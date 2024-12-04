@@ -1,50 +1,45 @@
 import javax.swing.*;
 import java.awt.*;
+import java.net.URI;
+import java.net.URL;
 
 public class InterFace1 extends JFrame {
-    JFrame frame=new JFrame();
-    JLabel label=new JLabel();
-    JLabel label1=new JLabel();
-    JLabel label2=new JLabel();
-    JButton button1=new JButton();
-    JButton button2=new JButton();
 
 
-    InterFace1(){
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setTitle("Movie Ticket Booking System");
-        frame.setSize(600,500);
-        frame.setLayout(null);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-        frame.setResizable(false);
+    InterFace1() {
+        //header
+        JPanel heading = new JPanel();
+        heading.setBackground(new Color(0,0,0,20));
+        heading.setBounds(0,0,650,80 );
+        JLabel headingText= new JLabel("Welcome to Movie Ticket Booking System");
+        headingText.setFont(new Font("Algerian",Font.BOLD|Font.ITALIC,25));
+        headingText.setForeground(Color.white);
+        headingText.setBounds(200,50,400,50);
+        heading.add(headingText);
 
-        //LABEL
-        label.setBounds(35,0,600,50);
-        label.setFont(new Font("Poppins",Font.BOLD,25));
-        label.setText("Welcome to Movie Ticket Booking System");
+        //User & Admin Panels
 
-        //LABEL 1
-        label1.setBounds(10,70,200,50);
-        label1.setFont(new Font("Poppins",Font.ITALIC,15));
-        label1.setText("Enter as a User:");
-        /* Button 1*/
-        button1.setText("User");
-        button1.setBounds(150,84,80,25);
-        button1.setFocusPainted(false);
-        //LABEL 2
-        label2.setBounds(10,150,200,50);
-        label2.setFont(new Font("Poppins",Font.ITALIC,15));
-        label2.setText("Enter as an Admin:");
-        //Button 2
-        button2.setText("Admin");
-        button2.setBounds(150,160,80,25);
-        button2.setFocusPainted(false);
-        frame.add(label);
-        frame.add(label1);
-        frame.add(label2);
-        frame.add(button1);
-        frame.add(button2);
+
+        //frame
+        setTitle("InterFace 1");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(650, 450);
+        setLayout(null);
+        setResizable(false);
+        setLocationRelativeTo(null);
+
+
+        //background
+        ImageIcon i1=new ImageIcon(ClassLoader.getSystemResource("bg.jpg"));
+        Image i2=i1.getImage().getScaledInstance(650,450,Image.SCALE_DEFAULT);
+        ImageIcon i3=new ImageIcon(i2);
+        JLabel background=new JLabel(i3);
+        background.setBounds(0,0,650,450);
+
+
+        add(background);
+        background.add(heading);
+        setVisible(true);
 
     }
 }
