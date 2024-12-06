@@ -1,7 +1,7 @@
 import javax.swing.*;
 import java.awt.*;
-import java.net.URI;
-import java.net.URL;
+import java.awt.event.ActionListener;
+
 
 public class InterFace1 extends JFrame {
 
@@ -14,6 +14,10 @@ public class InterFace1 extends JFrame {
         setLayout(null);
         setResizable(false);
         setLocationRelativeTo(null);
+        ImageIcon Logo = new ImageIcon(getClass().getClassLoader().getResource("Logo.png"));
+
+        setIconImage(Logo.getImage());
+
         //background
         ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("bg.jpg"));
         Image i2 = i1.getImage().getScaledInstance(650, 450, Image.SCALE_DEFAULT);
@@ -47,12 +51,13 @@ public class InterFace1 extends JFrame {
                 user_text.setFont(new Font("Poppins", Font.ITALIC, 15));
                 user_text.setForeground(Color.white);
                 user_text.setBounds(10, 25, 200, 20);
+                //Button 1
                 JButton userButton = new JButton("User");
                 userButton.setBounds(180, 25, 80, 25);
                 userButton.setFont(new Font("Poppins", Font.BOLD, 15));
                 userButton.setFocusPainted(false);
                 userButton.setForeground(Color.BLACK);
-                userButton.setBackground(Color.gray);
+                userButton.setBackground(Color.lightGray);
 
                 User_Admin.add(user_text);
                 User_Admin.add(userButton);
@@ -68,8 +73,8 @@ public class InterFace1 extends JFrame {
                 adminButton.setBounds(180, 100, 85, 25);
                 adminButton.setFont(new Font("Poppins", Font.BOLD, 15));
                 adminButton.setFocusPainted(false);
-                adminButton.setForeground(Color.BLACK);
-                adminButton.setBackground(Color.gray);
+                adminButton.setForeground(Color.black);
+                adminButton.setBackground(Color.lightGray);
 
                 User_Admin.add(admin_text);
                 User_Admin.add(adminButton);
