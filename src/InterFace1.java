@@ -14,8 +14,7 @@ public class InterFace1 extends JFrame {
         setLayout(null);
         setResizable(false);
         setLocationRelativeTo(null);
-        ImageIcon Logo = new ImageIcon(getClass().getClassLoader().getResource("Logo.png"));
-
+        ImageIcon Logo = new ImageIcon(getClass().getResource("Logo.png"));
         setIconImage(Logo.getImage());
 
         //background
@@ -33,7 +32,7 @@ public class InterFace1 extends JFrame {
             heading.setBackground(new Color(0, 0, 0, 20));
             heading.setBounds(0, 0, 650, 80);
             JLabel headingText = new JLabel("Welcome to Movie Ticket Booking System");
-            headingText.setFont(new Font("Algerian", Font.BOLD | Font.ITALIC, 25));
+            headingText.setFont(new Font("segoe print", Font.BOLD | Font.ITALIC, 25));
             headingText.setForeground(Color.white);
             headingText.setBounds(200, 50, 400, 50);
             heading.add(headingText);
