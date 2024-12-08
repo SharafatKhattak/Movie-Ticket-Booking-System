@@ -1,102 +1,102 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Login extends JFrame {
 
-
-    Login(){
+    public Login() {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(null);
         setSize(650, 450);
         setResizable(false);
         setLocationRelativeTo(null);
+
+        // Set icon image
         ImageIcon logo = new ImageIcon(getClass().getResource("/Logo.png"));
         setIconImage(logo.getImage());
-        /*------Background------*/
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("bg2.jpg"));
+
+        // Background image
+        ImageIcon i1 = new ImageIcon(getClass().getResource("bg2.jpg"));
         Image i2 = i1.getImage().getScaledInstance(650, 450, Image.SCALE_SMOOTH);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel background = new JLabel(i3);
-        background.setBounds(0, 0, 650, 450);
-
-        {
-            //LoginHeading
-            JLabel heading = new JLabel("Login");
-            heading.setBounds(150, 0, 100, 50);
-            heading.setFont(new Font("segoe print", Font.BOLD | Font.ITALIC, 30));
-            heading.setForeground(Color.white);
-
-            background.add(heading);
-        }
-        {
-            JPanel panel = new JPanel();
-            panel.setBounds(10, 60, 370, 315);
-            panel.setLayout(null);
-            panel.setBackground(new Color(53,109,122,10));
-            background.add(panel);
-            {
-                //name
-                JLabel nameText = new JLabel(" User Name:");
-                nameText.setBounds(0,10,100,30);
-                nameText.setFont(new Font("segoe print", Font.BOLD, 15));
-                nameText.setForeground(Color.white);
-                nameText.setOpaque(false);
-
-                panel.add(nameText);
-                //nameArea
-                JTextArea nameArea = new JTextArea();
-                nameArea.setBackground(Color.white);
-                nameArea.setBounds(100,13,250,25);
-
-                panel.add(nameArea);
-            }
-            {
-                //password
-                JLabel password = new JLabel(" Password:");
-                password.setBounds(0,80,100,30);
-                password.setFont(new Font("segoe print", Font.BOLD, 15));
-                password.setForeground(Color.white);
-
-                panel.add(password);
-
-                JTextArea passwordArea = new JTextArea();
-                passwordArea.setBackground(Color.white);
-                passwordArea.setBounds(100,83,250,25);
-
-                panel.add(passwordArea);
-            }
-            {
-                //Forgot Password
-                JLabel forgotText = new JLabel(" Forgot Password");
-                forgotText.setBounds(255,100,200,30);
-                forgotText.setFont(new Font("segoe print", Font.ITALIC, 10));
-                forgotText.setForeground(Color.white);
-                panel.add(forgotText);
-            }
-            JButton loginButton = new JButton("Login");
-            loginButton.setBounds(20,200,110,30);
-            loginButton.setBackground(new Color(0,0,0,0));
-            loginButton.setFocusPainted(false);
-            loginButton.setFont(new Font("segoe print", Font.BOLD, 20));
-            loginButton.setForeground(Color.white);
-            panel.add(loginButton);
-
-
-            JButton CancelButton = new JButton("Cancel");
-            CancelButton.setBounds(220,200,100,30);
-            CancelButton.setBackground(new Color(0,0,0,0));
-            CancelButton.setFocusPainted(false);
-            CancelButton.setFont(new Font("segoe print", Font.BOLD, 20));
-            CancelButton.setForeground(Color.white);
-            panel.add(CancelButton);
-
-
-
-        }
-
+        background.setLayout(null);
         add(background);
-        setVisible(true);
 
+        // Login Heading
+        JLabel heading = new JLabel("Login");
+        heading.setFont(new Font("Segoe Print", Font.BOLD | Font.ITALIC, 30));
+        heading.setForeground(Color.WHITE);
+        heading.setBounds(150, 20, 100, 50);  // Set bounds (x, y, width, height)
+        background.add(heading);
+
+        // Username Label
+        JLabel nameText = new JLabel("User Name:");
+        nameText.setFont(new Font("Segoe Print", Font.BOLD, 15));
+        nameText.setForeground(Color.WHITE);
+        nameText.setBounds(50, 100, 100, 30);  // Set bounds
+        background.add(nameText);
+
+        // Username Field
+        JTextField nameField = new JTextField(15);
+        nameField.setBounds(150, 100, 250, 30);  // Set bounds
+        background.add(nameField);
+
+        // Password Label
+        JLabel passwordText = new JLabel("Password:");
+        passwordText.setFont(new Font("Segoe Print", Font.BOLD, 15));
+        passwordText.setForeground(Color.WHITE);
+        passwordText.setBounds(50, 160, 100, 30);  // Set bounds
+        background.add(passwordText);
+
+        // Password Field
+        JPasswordField passwordField = new JPasswordField(15);
+        passwordField.setBounds(150, 160, 250, 30);  // Set bounds
+        background.add(passwordField);
+
+        // Forgot Password Label
+        JLabel forgotText = new JLabel("Forgot Password?");
+        forgotText.setFont(new Font("Segoe Print", Font.ITALIC, 10));
+        forgotText.setForeground(Color.WHITE);
+        forgotText.setBounds(255, 200, 200, 30);  // Set bounds
+        background.add(forgotText);
+
+        // Login Button
+        JButton loginButton = new JButton("Login");
+        loginButton.setFont(new Font("Segoe Print", Font.BOLD, 15));
+        loginButton.setBackground(new Color(53, 109, 122));
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFocusPainted(false);
+        loginButton.setBounds(100, 250, 100, 30);  // Set bounds
+        loginButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String username = nameField.getText();
+                String password = new String(passwordField.getPassword());
+
+                if (username.isEmpty() || password.isEmpty()) {
+                    JOptionPane.showMessageDialog(Login.this, "Please enter both username and password.", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+
+                    JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
+        });
+        background.add(loginButton);
+
+        // Cancel Button
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setFont(new Font("Segoe Print", Font.BOLD, 15));
+        cancelButton.setBackground(new Color(53, 109, 122));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFocusPainted(false);
+        cancelButton.setBounds(250, 250, 100, 30);  // Set bounds
+        cancelButton.addActionListener(e -> System.exit(0));
+        background.add(cancelButton);
+
+        setVisible(true);
     }
+
+
 }

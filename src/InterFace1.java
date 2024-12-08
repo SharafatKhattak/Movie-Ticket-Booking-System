@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 
@@ -57,7 +58,12 @@ public class InterFace1 extends JFrame {
                 userButton.setFocusPainted(false);
                 userButton.setForeground(Color.BLACK);
                 userButton.setBackground(Color.lightGray);
-
+                userButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        dispose();
+                        Login login = new Login();
+                    }
+                });
                 User_Admin.add(user_text);
                 User_Admin.add(userButton);
             }
@@ -74,6 +80,11 @@ public class InterFace1 extends JFrame {
                 adminButton.setFocusPainted(false);
                 adminButton.setForeground(Color.black);
                 adminButton.setBackground(Color.lightGray);
+                adminButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+
+                    }
+                });
 
                 User_Admin.add(admin_text);
                 User_Admin.add(adminButton);
