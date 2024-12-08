@@ -82,7 +82,8 @@ public class InterFace1 extends JFrame {
                 adminButton.setBackground(Color.lightGray);
                 adminButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
-
+                        dispose();
+                        adminLogin admin = new adminLogin();
                     }
                 });
 
