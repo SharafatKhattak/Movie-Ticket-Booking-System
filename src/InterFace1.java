@@ -83,7 +83,7 @@ public class InterFace1 extends JFrame {
                 adminButton.addActionListener(new ActionListener() {
                     public void actionPerformed(ActionEvent e) {
                         dispose();
-                        adminLogin admin = new adminLogin();
+                        //adminLogin admin = new adminLogin();
                     }
                 });
 
