@@ -2,8 +2,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 public class Login extends JFrame {
+
 
     public Login() {
         setTitle("Login");
@@ -59,9 +61,36 @@ public class Login extends JFrame {
         JLabel forgotText = new JLabel("Forgot Password?");
         forgotText.setFont(new Font("Segoe Print", Font.ITALIC, 10));
         forgotText.setForeground(Color.WHITE);
-        forgotText.setBounds(255, 200, 200, 30);  // Set bounds
+        forgotText.setBounds(300, 200, 200, 30);  // Set bounds
         background.add(forgotText);
 
+        //CreateNewAccount
+        {
+            JButton createAccountButton = new JButton("Create new account");
+            createAccountButton.setFont(new Font("Segoe Print", Font.ITALIC, 10));
+            createAccountButton.setBackground(new Color(53, 109, 122, 0));
+            createAccountButton.setBounds(80, 200, 200, 30);
+            // Make the button transparent
+            createAccountButton.setContentAreaFilled(false); // Remove background fill
+            createAccountButton.setBorderPainted(false);     // Remove button border
+            createAccountButton.setFocusPainted(false);      // Remove focus indicator
+
+            background.add(createAccountButton);
+            createAccountButton.setForeground(Color.WHITE);
+            //eventHandler
+            createAccountButton.addMouseListener(new java.awt.event.MouseAdapter() {
+                public void mouseEntered(MouseEvent evt) {
+                    createAccountButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+                }
+            });
+            createAccountButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    dispose();
+                    Signup signup = new Signup();
+                }
+            });
+        }
         // Login Button
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe Print", Font.BOLD, 15));
@@ -69,6 +98,12 @@ public class Login extends JFrame {
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
         loginButton.setBounds(100, 250, 100, 30);  // Set bounds
+
+        loginButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+            }
+        });
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -92,6 +127,11 @@ public class Login extends JFrame {
         cancelButton.setForeground(Color.WHITE);
         cancelButton.setFocusPainted(false);
         cancelButton.setBounds(250, 250, 100, 30);  // Set bounds
+        cancelButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                cancelButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+            }
+        });
         cancelButton.addActionListener(e -> System.exit(0));
         background.add(cancelButton);
 
@@ -99,4 +139,7 @@ public class Login extends JFrame {
     }
 
 
+
 }
+
+

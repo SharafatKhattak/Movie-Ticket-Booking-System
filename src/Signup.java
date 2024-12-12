@@ -124,6 +124,7 @@ public class Signup extends JFrame {
 
         // Add the panel to the frame
         add(panel);
+        setVisible(true);
     }
 
 
