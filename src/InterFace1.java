@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 
 public class InterFace1 extends JFrame {
@@ -51,19 +52,8 @@ public class InterFace1 extends JFrame {
                 user_text.setFont(new Font("Poppins", Font.ITALIC, 15));
                 user_text.setForeground(Color.white);
                 user_text.setBounds(10, 25, 200, 20);
-                //Button 1
-                JButton userButton = new JButton("User");
-                userButton.setBounds(180, 25, 80, 25);
-                userButton.setFont(new Font("Poppins", Font.BOLD, 15));
-                userButton.setFocusPainted(false);
-                userButton.setForeground(Color.BLACK);
-                userButton.setBackground(Color.lightGray);
-                userButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        dispose();
-                        Login login = new Login();
-                    }
-                });
+                //usrBtn
+                JButton userButton = getJButton();
                 User_Admin.add(user_text);
                 User_Admin.add(userButton);
             }
@@ -73,22 +63,22 @@ public class InterFace1 extends JFrame {
                 JLabel admin_text = new JLabel("Enter as an Admin: ");
                 admin_text.setFont(new Font("Poppins", Font.ITALIC, 15));
                 admin_text.setForeground(Color.white);
-                admin_text.setBounds(10, 100, 200, 20);
-                JButton adminButton = new JButton("Admin");
-                adminButton.setBounds(180, 100, 85, 25);
-                adminButton.setFont(new Font("Poppins", Font.BOLD, 15));
-                adminButton.setFocusPainted(false);
-                adminButton.setForeground(Color.black);
-                adminButton.setBackground(Color.lightGray);
-                adminButton.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        dispose();
-                        //adminLogin admin = new adminLogin();
-                    }
-                });
-
+                admin_text.setBounds(10, 85, 200, 20);
+                JButton adminButton =getAdminButton();
                 User_Admin.add(admin_text);
                 User_Admin.add(adminButton);
+                background.add(User_Admin);
+            }
+            {
+                //Guest
+                JLabel Guest_text = new JLabel("Enter as a Guest: ");
+                Guest_text.setFont(new Font("Poppins", Font.ITALIC, 15));
+                Guest_text.setForeground(Color.white);
+                Guest_text.setBounds(10, 145, 200, 20);
+                JButton GuestButton =getGuestButton();
+
+                User_Admin.add(Guest_text);
+                User_Admin.add(GuestButton);
                 background.add(User_Admin);
             }
         }
@@ -109,4 +99,84 @@ public class InterFace1 extends JFrame {
         setVisible(true);
 
     }
+
+    private JButton getJButton() {
+        JButton userButton = new JButton("User");
+        userButton.setBounds(180, 25, 80, 25);
+        userButton.setFont(new Font("Poppins", Font.BOLD, 15));
+        userButton.setFocusPainted(false);
+        userButton.setForeground(Color.BLACK);
+        userButton.setBackground(Color.lightGray);
+        //mouse pointer
+        userButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                userButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+            }
+        });
+        userButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                Login login = new Login();
+            }
+        });
+        return userButton;
+    }
+
+    private JButton getAdminButton() {
+        // Create the button
+        JButton adminButton = new JButton("Admin");
+        adminButton.setBounds(180, 85, 85, 25);
+        adminButton.setFont(new Font("Poppins", Font.BOLD, 15));
+        adminButton.setFocusPainted(false);
+        adminButton.setForeground(Color.black);
+        adminButton.setBackground(Color.lightGray);
+
+        // Mouse hover effect to change cursor
+        adminButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                adminButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+            }
+        });
+
+        // ActionListener for button click
+        adminButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Close the current window
+                adminLogin admin = new adminLogin(); // Open admin login window
+            }
+        });
+
+
+        return adminButton; // Returning only the button, you can add the label separately
+    }
+    //Guest Button
+    private JButton getGuestButton() {
+        // Create the button
+        JButton guestButton = new JButton("Guest");
+        guestButton.setBounds(180, 145, 85, 25);
+        guestButton.setFont(new Font("Poppins", Font.BOLD, 15));
+        guestButton.setFocusPainted(false);
+        guestButton.setForeground(Color.black);
+        guestButton.setBackground(Color.lightGray);
+
+        // Mouse hover effect to change cursor
+        guestButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                guestButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+            }
+        });
+
+        // ActionListener for button click
+        guestButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Close the current window
+                // main page object
+            }
+        });
+
+
+
+        return guestButton;
+    }
+
 }
