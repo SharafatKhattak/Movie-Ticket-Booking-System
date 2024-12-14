@@ -3,6 +3,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Login extends JFrame {
 
@@ -113,11 +117,16 @@ public class Login extends JFrame {
                 if (username.isEmpty() || password.isEmpty()) {
                     JOptionPane.showMessageDialog(Login.this, "Please enter both username and password.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-
-                    JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                    if (authenticateUser(username, password)) {
+                        JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                        // Proceed to the next screen or functionality
+                    } else {
+                        JOptionPane.showMessageDialog(Login.this, "Invalid username or password.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
             }
         });
+
         background.add(loginButton);
 
         // Cancel Button
@@ -138,6 +147,36 @@ public class Login extends JFrame {
         setVisible(true);
     }
 
+    private boolean authenticateUser(String username, String password) {
+        String dbUrl = "jdbc:mysql://localhost:3306/moviebeats"; // Database URL
+        String dbUser = "root"; // Replace with your MySQL username
+        String dbPassword = "sharafat@321"; // Replace with your MySQL password
+
+        String query = "SELECT password_hash FROM users WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            // Set the username in the query
+            stmt.setString(1, username);
+
+            // Execute the query
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                String storedPasswordHash = rs.getString("password_hash");
+
+                // Hash the provided password and compare with the stored hash
+                return password.equals(storedPasswordHash); // Replace with hashing logic
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
+        return false; // User not found or incorrect password
+    }
 
 
 }

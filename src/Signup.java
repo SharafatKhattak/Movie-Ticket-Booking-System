@@ -104,8 +104,13 @@ public class Signup extends JFrame {
                 String confirmPassword = new String(confirmPasswordField.getPassword());
 
                 if (password.equals(confirmPassword)) {
+                    // Hash the password before saving (use a library like bcrypt for this)
+                    String hashedPassword = password; // Replace this with actual hashing logic
+
+                    DatabaseUtils.saveUser(username, email, hashedPassword);
                     JOptionPane.showMessageDialog(null, "Sign-Up Successful!");
-                    // Add logic to save user details
+                    dispose();
+                    Login login = new Login();
                 } else {
                     JOptionPane.showMessageDialog(null, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
