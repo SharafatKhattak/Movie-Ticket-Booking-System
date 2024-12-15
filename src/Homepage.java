@@ -120,8 +120,5 @@ public class Homepage extends JFrame {
 
     }
 
-    public static void main(String[] args) {
-        // Run the program
-        new Homepage();
-    }
+
 }
