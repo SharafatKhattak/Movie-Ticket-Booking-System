@@ -31,11 +31,12 @@ public class Homepage extends JFrame {
 
         JLabel systemLabel = createHeaderLabel("🎥 Movie Booking System", JLabel.LEFT);
         JLabel welcomeLabel = createHeaderLabel("Welcome back!", JLabel.CENTER);
-        JLabel usernameLabel = createHeaderLabel("User123", JLabel.RIGHT);
+        JLabel usernameLabel = createHeaderLabel("User123", JLabel.R
 
         northPanel.add(systemLabel, BorderLayout.WEST);
         northPanel.add(welcomeLabel, BorderLayout.CENTER);
         northPanel.add(usernameLabel, BorderLayout.EAST);
+
 
         mainPanel.add(northPanel, BorderLayout.NORTH);
 
@@ -166,6 +167,7 @@ public class Homepage extends JFrame {
         label.setFont(new Font("Segoe UI", Font.BOLD, 18));
         label.setForeground(Color.WHITE);
         return label;
+
     }
 
 
