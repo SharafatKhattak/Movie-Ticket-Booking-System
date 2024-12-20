@@ -28,4 +28,14 @@ public class DatabaseUtils {
             ex.printStackTrace();
         }
     }
+
+
+        private static final String URL = "jdbc:mysql://localhost:3306/movie_booking_system";
+        private static final String USER = "root";
+        private static final String PASSWORD = "Shabi6264"; // Replace with your MySQL root password
+
+
+
+
 }
+
