@@ -4,7 +4,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-       Homepage interFace1= new Homepage("shabi123");
+       Homepage interFace1=new Homepage();
 
 
     }
