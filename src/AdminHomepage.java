@@ -1,11 +1,15 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class AdminHomepage extends JFrame {
-
+    private String movieName;
+    private String moviePosterPath;
     public AdminHomepage() {
+
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
@@ -32,6 +36,7 @@ public class AdminHomepage extends JFrame {
         add(background);
         setVisible(true);
     }
+
 
     private void setFullScreenWindow() {
         Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -62,6 +67,25 @@ public class AdminHomepage extends JFrame {
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe Print", Font.BOLD | Font.ITALIC, 30));
 
+        // Add reload functionality
+        title.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                title.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose();
+                new AdminHomepage();
+            }
+        });
+
         titlePanel.add(title);
         return titlePanel;
     }
@@ -86,10 +110,8 @@ public class AdminHomepage extends JFrame {
 
         // Add menu buttons
         gbc.anchor = GridBagConstraints.WEST;
-        menuPanel.add(createMenuButton("Dashboard", e -> showMessage("Dashboard button clicked!")), gbc);
-        menuPanel.add(createMenuButton("Add Movie", e -> new AddMovie()), gbc);
+        menuPanel.add(createMenuButton("Homepage", e -> showMessage(" button clicked!")), gbc);
         menuPanel.add(createMenuButton("Customers", e -> showMessage("Customers button clicked!")), gbc);
-        menuPanel.add(createMenuButton("Available Movies", e -> showMessage("Available Movies button clicked!")), gbc);
         menuPanel.add(createMenuButton("Manage Account", e -> showMessage("Manage Account button clicked!")), gbc);
 
         // Add Sign Out Button at the bottom
@@ -120,28 +142,31 @@ public class AdminHomepage extends JFrame {
         JLabel posterLabel = new JLabel(new ImageIcon(getClass().getResource(""))); // Placeholder for movie poster
         moviePanel.add(posterLabel, BorderLayout.CENTER);
 
-        JButton bookButton = new JButton("Book");
-        bookButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        bookButton.setBackground(new Color(191, 64, 64));
-        bookButton.setForeground(Color.WHITE);
-        bookButton.setFocusPainted(false);
-        bookButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        bookButton.addActionListener(e -> showMessage(movieName + " booking clicked!"));
-
-        // Change cursor to hand when mouse enters the button
-        bookButton.addMouseListener(new MouseAdapter() {
+        JButton AddButton = new JButton("Add");
+        AddButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        AddButton.setBackground(new Color(191, 64, 64));
+        AddButton.setForeground(Color.WHITE);
+        AddButton.setFocusPainted(false);
+        AddButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        AddButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddMovie addMovie = new AddMovie();
+            }
+        });
+        AddButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent evt) {
-                bookButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                AddButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent evt) {
-                bookButton.setCursor(Cursor.getDefaultCursor());
+                AddButton.setCursor(Cursor.getDefaultCursor());
             }
         });
 
-        moviePanel.add(bookButton, BorderLayout.SOUTH);
+        moviePanel.add(AddButton, BorderLayout.SOUTH);
 
         return moviePanel;
     }

@@ -119,6 +119,7 @@ public class Login extends JFrame {
                 } else {
                     if (authenticateUser(username, password)) {
                         JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
+                        Homepage homepage=new Homepage();
                         // Proceed to the next screen or functionality
                     } else {
                         JOptionPane.showMessageDialog(Login.this, "Invalid username or password.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -177,7 +178,6 @@ public class Login extends JFrame {
 
         return false; // User not found or incorrect password
     }
-
 
 }
 
