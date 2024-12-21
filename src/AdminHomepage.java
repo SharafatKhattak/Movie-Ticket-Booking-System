@@ -1,21 +1,29 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdminHomepage extends JFrame {
-    private String movieName;
-    private String moviePosterPath;
-    public AdminHomepage() {
+    private List<Movie> movies;
+    private JPanel movieGridPanel;
 
+    public AdminHomepage() {
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
         setFullScreenWindow();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
+
+        // Fetch movies from the database
+        movies = fetchMoviesFromDatabase();
 
         // Background Panel with Gradient
         JPanel background = createBackgroundPanel();
@@ -29,14 +37,13 @@ public class AdminHomepage extends JFrame {
         background.add(menuPanel, BorderLayout.WEST);
 
         // Add Movie Grid Panel
-        JPanel movieGridPanel = createMovieGridPanel();
+        movieGridPanel = createMovieGridPanel();
         background.add(movieGridPanel, BorderLayout.CENTER);
 
         // Add background to the frame
         add(background);
         setVisible(true);
     }
-
 
     private void setFullScreenWindow() {
         Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
@@ -110,9 +117,17 @@ public class AdminHomepage extends JFrame {
 
         // Add menu buttons
         gbc.anchor = GridBagConstraints.WEST;
-        menuPanel.add(createMenuButton("Homepage", e -> showMessage(" button clicked!")), gbc);
+        menuPanel.add(createMenuButton("Homepage", e -> showMessage("Homepage button clicked!")), gbc);
         menuPanel.add(createMenuButton("Customers", e -> showMessage("Customers button clicked!")), gbc);
         menuPanel.add(createMenuButton("Manage Account", e -> showMessage("Manage Account button clicked!")), gbc);
+
+        // Add "Add Movie" Button
+        gbc.anchor = GridBagConstraints.CENTER;
+        menuPanel.add(createMenuButton("Add Movie", e -> new AddMovie(this::refreshMovies)), gbc);
+
+        // Add "Delete Movie" Button
+        gbc.anchor = GridBagConstraints.CENTER;
+        menuPanel.add(createMenuButton("Delete Movie", e -> new DeleteMovie(this::refreshMovies)), gbc);
 
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
@@ -127,48 +142,39 @@ public class AdminHomepage extends JFrame {
         movieGridPanel.setLayout(new GridLayout(3, 3, 10, 10)); // 3x3 grid with gaps
         movieGridPanel.setOpaque(false); // Make the parent container transparent
 
-        for (int i = 0; i < 9; i++) {
-            movieGridPanel.add(createMoviePanel("Movie " + (i + 1)));
+        for (Movie movie : movies) {
+            movieGridPanel.add(createMoviePanel(movie));
+        }
+
+        // Add empty panels to fill the grid if there are less than 9 movies
+        int emptyPanels = 9 - movies.size();
+        for (int i = 0; i < emptyPanels; i++) {
+            movieGridPanel.add(createEmptyPanel());
         }
 
         return movieGridPanel;
     }
 
-    private JPanel createMoviePanel(String movieName) {
+    private JPanel createMoviePanel(Movie movie) {
         JPanel moviePanel = new JPanel();
         moviePanel.setLayout(new BorderLayout());
         moviePanel.setBackground(new Color(0, 0, 0, 150)); // semi-transparent background
 
-        JLabel posterLabel = new JLabel(new ImageIcon(getClass().getResource(""))); // Placeholder for movie poster
+        JLabel posterLabel = new JLabel(new ImageIcon(movie.getPosterPath())); // Set movie poster
         moviePanel.add(posterLabel, BorderLayout.CENTER);
 
-        JButton AddButton = new JButton("Add");
-        AddButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        AddButton.setBackground(new Color(191, 64, 64));
-        AddButton.setForeground(Color.WHITE);
-        AddButton.setFocusPainted(false);
-        AddButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        AddButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                AddMovie addMovie = new AddMovie();
-            }
-        });
-        AddButton.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent evt) {
-                AddButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent evt) {
-                AddButton.setCursor(Cursor.getDefaultCursor());
-            }
-        });
-
-        moviePanel.add(AddButton, BorderLayout.SOUTH);
+        JLabel nameLabel = new JLabel(movie.getMovieName(), SwingConstants.CENTER); // Set movie name
+        nameLabel.setForeground(Color.WHITE);
+        nameLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        moviePanel.add(nameLabel, BorderLayout.SOUTH);
 
         return moviePanel;
+    }
+
+    private JPanel createEmptyPanel() {
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setBackground(new Color(0, 0, 0, 0)); // Fully transparent background
+        return emptyPanel;
     }
 
     private JButton createMenuButton(String name, java.awt.event.ActionListener action) {
@@ -206,6 +212,7 @@ public class AdminHomepage extends JFrame {
         signOutButton.addActionListener(e -> {
             JOptionPane.showMessageDialog(null, "Signed Out Successfully!");
             dispose(); // Close the frame
+            new InterFace1();
         });
 
         // Change cursor to hand when mouse enters the button
@@ -226,6 +233,51 @@ public class AdminHomepage extends JFrame {
 
     private void showMessage(String message) {
         JOptionPane.showMessageDialog(null, message);
+    }
+
+    private List<Movie> fetchMoviesFromDatabase() {
+        List<Movie> movies = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root"; // Replace with your MySQL username
+        String password = "sharafat@321"; // Replace with your MySQL password
+
+        String query = "SELECT id, movieName, posterPath FROM movies";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {while (rs.next()) {
+            int id = rs.getInt("id");
+            String movieName = rs.getString("movieName");
+            String posterPath = rs.getString("posterPath");
+            movies.add(new Movie(id, movieName, posterPath));
+        }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error fetching movies from database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return movies;
+    }
+
+    private void refreshMovies() {
+        movies = fetchMoviesFromDatabase();
+        movieGridPanel.removeAll();
+        for (Movie movie : movies) {
+            movieGridPanel.add(createMoviePanel(movie));
+        }
+
+        // Add empty panels to fill the grid if there are less than 9 movies
+        int emptyPanels = 9 - movies.size();
+        for (int i = 0; i < emptyPanels; i++) {
+            movieGridPanel.add(createEmptyPanel());
+        }
+
+        movieGridPanel.revalidate();
+        movieGridPanel.repaint();
     }
 
     public static void main(String[] args) {

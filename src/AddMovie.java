@@ -1,12 +1,20 @@
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class AddMovie extends JFrame {
     private JTextField txtMovieName;
     private JTextField txtPosterPath;
+    private Runnable onMovieAdded;
 
-    public AddMovie() {
+    public AddMovie(Runnable onMovieAdded) {
+        this.onMovieAdded = onMovieAdded;
+
         setTitle("Add Movie");
         ImageIcon logo = new ImageIcon(getClass().getResource("/Logo.png"));
         setIconImage(logo.getImage());
@@ -17,6 +25,9 @@ public class AddMovie extends JFrame {
 
         // Set layout to null for manual positioning
         setLayout(null);
+        JPanel background = setBackgroundPanel();
+        background.setLayout(null); // Use null layout for manual positioning
+        setContentPane(background);
 
         // Add components
         addComponents();
@@ -27,6 +38,7 @@ public class AddMovie extends JFrame {
     private void addComponents() {
         // Label for Movie Name
         JLabel lblMovieName = new JLabel("Enter Movie Name:");
+        lblMovieName.setForeground(Color.white);
         lblMovieName.setBounds(20, 50, 150, 30);
         add(lblMovieName);
 
@@ -38,6 +50,7 @@ public class AddMovie extends JFrame {
         // Label for Poster Path
         JLabel lblPosterPath = new JLabel("Enter Movie Poster Path:");
         lblPosterPath.setBounds(20, 100, 150, 30);
+        lblPosterPath.setForeground(Color.white);
         add(lblPosterPath);
 
         // Text Field for Poster Path
@@ -64,22 +77,68 @@ public class AddMovie extends JFrame {
                             "Input Error",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(null,
-                            "Movie Name: " + movieName + "\nPoster Path: " + posterPath);
+                    saveToDatabase(movieName, posterPath);
                 }
             }
         });
     }
 
+    private void saveToDatabase(String movieName, String posterPath) {
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "sharafat@321";
+
+        String query = "INSERT INTO movies (movieName, posterPath) VALUES (?, ?)";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, movieName);
+            stmt.setString(2, posterPath);
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(null,
+                    "Movie saved successfully!",
+                    "Success",
+                    JOptionPane.INFORMATION_MESSAGE);
+
+            // Notify AdminHomepage
+            if (onMovieAdded != null) {
+                onMovieAdded.run();
+            }
+
+            dispose(); // Close the AddMovie window
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error saving movie to database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+    private JPanel setBackgroundPanel() {
+        return new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2d = (Graphics2D) g;
+                GradientPaint gradient = new GradientPaint(0, 0, Color.DARK_GRAY, getWidth(), getHeight(), Color.RED);
+                g2d.setPaint(gradient);
+                g2d.fillRect(0, 0, getWidth(), getHeight());
+            }
+        };
+    }
+
     public String getMovieName() {
-        return txtMovieName.getText().trim(); // Return the trimmed movie name
+        return txtMovieName.getText().trim();
     }
 
     public String getPosterPath() {
-        return txtPosterPath.getText().trim(); // Return the trimmed poster path
+        return txtPosterPath.getText();
     }
 
     public static void main(String[] args) {
-        new AddMovie(); // Test the class
+        new AddMovie(null);
     }
 }
