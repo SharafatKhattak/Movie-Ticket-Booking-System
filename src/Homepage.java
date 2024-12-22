@@ -1,17 +1,59 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 
 public class Homepage extends JFrame {
 
-    public Homepage() {
-        // Set up the main frame
-        setTitle("Movie Booking System");
-        setSize(800, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private String username; // Store the username
 
-        // Gradient background panel
-        JPanel mainPanel = new JPanel() {
+    // Database connection details
+    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/movei_ticket";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "Shabi6264@";
+
+    public Homepage(String username) {
+        this.username = username; // Set the username
+
+        // Set frame properties
+        setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
+        setTitle("Movie Booking System");
+        setFullScreenWindow();
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+
+        // Background Panel with Gradient
+        JPanel background = createBackgroundPanel();
+        background.setLayout(new BorderLayout());  // Use BorderLayout for main frame
+
+        // Add Title Panel
+        background.add(createTitlePanel(), BorderLayout.NORTH);
+
+        // Add Menu Panel
+        JPanel menuPanel = createMenuPanel();
+        background.add(menuPanel, BorderLayout.WEST);
+
+        // Add Movie Grid Panel
+        JPanel movieGridPanel = createMovieGridPanel();
+        background.add(movieGridPanel, BorderLayout.CENTER);
+
+        // Add background to the frame
+        add(background);
+        setVisible(true);
+    }
+
+    private void setFullScreenWindow() {
+        Rectangle screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        int screenWidth = (int) screenBounds.getWidth();
+        int screenHeight = (int) screenBounds.getHeight();
+        setSize(screenWidth, screenHeight); // Full window size
+    }
+
+    private JPanel createBackgroundPanel() {
+        return new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -21,152 +63,171 @@ public class Homepage extends JFrame {
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        mainPanel.setLayout(new BorderLayout());
-        setContentPane(mainPanel);
-
-        // --- NORTH PANEL (Header) ---
-        JPanel northPanel = new JPanel(new BorderLayout());
-        northPanel.setOpaque(false);
-        northPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JLabel systemLabel = createHeaderLabel("🎥 Movie Booking System", JLabel.LEFT);
-        JLabel welcomeLabel = createHeaderLabel("Welcome back!", JLabel.CENTER);
-        JLabel usernameLabel = createHeaderLabel("User123", JLabel.RIGHT);
-
-        northPanel.add(systemLabel, BorderLayout.WEST);
-        northPanel.add(welcomeLabel, BorderLayout.CENTER);
-        northPanel.add(usernameLabel, BorderLayout.EAST);
-
-        mainPanel.add(northPanel, BorderLayout.NORTH);
-
-        // --- WEST PANEL (Menu with Enhanced Buttons) ---
-        JPanel westPanel = new JPanel();
-        westPanel.setLayout(new GridLayout(5, 1, 10, 10));
-        westPanel.setOpaque(false);
-        westPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Stylish menu buttons
-        JButton dashboardButton = createStylishButton("Dashboard");
-        JButton addMovieButton = createStylishButton("Add Movie");
-        JButton customersButton = createStylishButton("Customers");
-        JButton availableMoviesButton = createStylishButton("Available Movies");
-        JButton manageAccountButton = createStylishButton("Manage Account");
-
-        westPanel.add(dashboardButton);
-        westPanel.add(addMovieButton);
-        westPanel.add(customersButton);
-        westPanel.add(availableMoviesButton);
-        westPanel.add(manageAccountButton);
-
-        mainPanel.add(westPanel, BorderLayout.WEST);
-
-        // --- CENTER PANEL (Movie Posters) ---
-        JPanel centerPanel = new JPanel(new GridLayout(3, 3, 10, 10));
-        centerPanel.setOpaque(false);
-        centerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // Replace with your movie poster paths and titles
-        String[] moviePosters = {
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\ALEIN.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\INCEPTION.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\IRON MAN 3.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\MOVE.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\The Dragon.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\The Dragon.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\The Dragon.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\The Dragon.jpg",
-                "C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\The Dragon.jpg"
-        };
-
-        String[] movieTitles = {
-                "ALIEN", "INCEPTION", "IRON MAN 3",
-                "MOVE", "THE DRAGON", "THE DRAGON",
-                "THE DRAGON", "THE DRAGON", "THE DRAGON"
-        };
-
-        // Create movie cards
-        for (int i = 0; i < moviePosters.length; i++) {
-            JPanel card = new JPanel();
-            card.setLayout(new BorderLayout());
-            card.setOpaque(false);
-
-            // Movie poster
-            ImageIcon image = new ImageIcon(moviePosters[i]);
-            Image img = image.getImage().getScaledInstance(150, 200, Image.SCALE_SMOOTH);
-            JLabel imageLabel = new JLabel(new ImageIcon(img));
-            imageLabel.setHorizontalAlignment(JLabel.CENTER);
-
-            // Movie title
-            JLabel titleLabel = new JLabel(movieTitles[i], JLabel.CENTER);
-            titleLabel.setForeground(Color.WHITE);
-            titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
-
-            card.add(imageLabel, BorderLayout.CENTER);
-            card.add(titleLabel, BorderLayout.SOUTH);
-
-            centerPanel.add(card);
-        }
-
-        mainPanel.add(centerPanel, BorderLayout.CENTER);
-
-        // --- SOUTH PANEL (Sign Out and Exit) ---
-        JPanel southPanel = new JPanel(new BorderLayout());
-        southPanel.setOpaque(false);
-        southPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        JButton signOutButton = createStylishButton("Sign Out");
-        JButton exitButton = createStylishButton("Exit");
-
-        exitButton.addActionListener(e -> System.exit(0));
-        signOutButton.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Signed Out Successfully!");
-            dispose();
-        });
-
-        southPanel.add(signOutButton, BorderLayout.WEST);
-        southPanel.add(exitButton, BorderLayout.EAST);
-
-        mainPanel.add(southPanel, BorderLayout.SOUTH);
-
-        setVisible(true);
     }
 
-    // Method to create a stylish button
-    private JButton createStylishButton(String text) {
-        JButton button = new JButton(text);
-        button.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        button.setForeground(Color.WHITE);
-        button.setFocusPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(true);
-        button.setBackground(new Color(0, 0, 0, 100));
-        button.setBorder(null);
+    private JPanel createTitlePanel() {
+        JPanel titlePanel = new JPanel();
+        titlePanel.setLayout(new BorderLayout());
+        titlePanel.setOpaque(false);
 
-        // Hover effect
-        button.addMouseListener(new MouseAdapter() {
+        // Title Label
+        JLabel title = new JLabel("Movie Ticket Booking System");
+        title.setForeground(Color.WHITE);
+        title.setFont(new Font("Segoe Print", Font.BOLD | Font.ITALIC, 30));
+        titlePanel.add(title, BorderLayout.WEST); // Add title to the left side
+
+        // Username Label
+        JLabel userLabel = new JLabel("Welcome, " + username + "!");
+        userLabel.setForeground(Color.WHITE);
+        userLabel.setFont(new Font("Segoe UI", Font.PLAIN, 20));
+        userLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        titlePanel.add(userLabel, BorderLayout.EAST); // Add username to the right side
+
+        return titlePanel;
+    }
+
+    private JPanel createMenuPanel() {
+        JPanel menuPanel = new JPanel();
+        menuPanel.setBackground(new Color(0, 0, 0, 100)); // semi-transparent background
+        menuPanel.setLayout(new GridBagLayout()); // Use GridBagLayout for menu panel
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+
+        // Add menu buttons
+        gbc.anchor = GridBagConstraints.WEST;
+        menuPanel.add(createMenuButton("Dashboard", e -> new Dashboard()), gbc);
+        menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
+        menuPanel.add(createMenuButton("My Bookings", e -> new MyBookings()), gbc);
+        menuPanel.add(createMenuButton("Offers & Discounts", e -> showMessage("Offers & Discounts button clicked!")), gbc);
+
+        // Add Sign Up Button
+        menuPanel.add(createMenuButton("Sign Up", e -> {
+            // Sample user data - Replace with actual data from your form
+            saveUserData("newUser", "newUser@example.com", "newUserPassword123");
+        }), gbc);
+
+        menuPanel.add(createMenuButton("View Account", e -> new ViewAccount()), gbc);
+
+        // Add Sign Out Button at the bottom
+        gbc.weighty = 1.0;
+        gbc.anchor = GridBagConstraints.SOUTH;
+        menuPanel.add(createSignOutButton(), gbc);
+
+        return menuPanel;
+    }
+
+    private JPanel createMovieGridPanel() {
+        JPanel movieGridPanel = new JPanel();
+        movieGridPanel.setLayout(new GridLayout(3, 3, 10, 10)); // 3x3 grid with gaps
+        movieGridPanel.setOpaque(false); // Make the parent container transparent
+
+        for (int i = 0; i < 9; i++) {
+            movieGridPanel.add(createMoviePanel("Movie " + (i + 1)));
+        }
+
+        return movieGridPanel;
+    }
+
+    private JPanel createMoviePanel(String movieName) {
+        JPanel moviePanel = new JPanel();
+        moviePanel.setLayout(new BorderLayout());
+        moviePanel.setBackground(new Color(0, 0, 0, 150)); // semi-transparent background
+
+        JLabel posterLabel = new JLabel(new ImageIcon(getClass().getResource(""))); // Placeholder for movie poster
+        moviePanel.add(posterLabel, BorderLayout.CENTER);
+
+        JButton bookButton = new JButton("Book");
+        bookButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        bookButton.setBackground(new Color(191, 64, 64));
+        bookButton.setForeground(Color.WHITE);
+        bookButton.setFocusPainted(false);
+        bookButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        bookButton.addActionListener(e -> (new Moviedetail("The Iron Men", "English", "3:00 hr", "Local", "25-5-2019")).setVisible(true));
+
+        // Change cursor to hand when mouse enters the button
+        bookButton.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent e) {
-                button.setBackground(Color.WHITE);
-                button.setForeground(Color.BLACK);
+            public void mouseEntered(MouseEvent evt) {
+                bookButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
 
             @Override
-            public void mouseExited(MouseEvent e) {
-                button.setBackground(new Color(0, 0, 0, 100));
-                button.setForeground(Color.WHITE);
+            public void mouseExited(MouseEvent evt) {
+                bookButton.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+
+        moviePanel.add(bookButton, BorderLayout.SOUTH);
+
+        return moviePanel;
+    }
+
+    private JButton createMenuButton(String name, java.awt.event.ActionListener action) {
+        JButton button = new JButton(name);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        button.setBackground(new Color(191, 64, 64)); // Light blue color
+        button.setForeground(Color.WHITE);
+        button.setFocusPainted(false);
+        button.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        button.addActionListener(action);
+
+        // Change cursor to hand when mouse enters the button
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent evt) {
+                button.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent evt) {
+                button.setCursor(Cursor.getDefaultCursor());
             }
         });
 
         return button;
     }
 
-    // Method to create header labels
-    private JLabel createHeaderLabel(String text, int alignment) {
-        JLabel label = new JLabel(text, alignment);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        label.setForeground(Color.WHITE);
-        return label;
+    private JButton createSignOutButton() {
+        JButton signOutButton = new JButton("Sign Out");
+        signOutButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        signOutButton.setBackground(new Color(0, 0, 0));
+        signOutButton.setForeground(new Color(255, 255, 255)); // Light blue for the text
+        signOutButton.setFocusPainted(false);
+        signOutButton.setBorder(BorderFactory.createLineBorder(new Color(0, 0, 0, 0))); // Blue border
+        signOutButton.addActionListener(e -> {
+            JOptionPane.showMessageDialog(null, "Signed Out Successfully!");
+            dispose(); // Close the frame
+        });
+
+        // Change cursor to hand when mouse enters the button
+        signOutButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent evt) {
+                signOutButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent evt) {
+                signOutButton.setCursor(Cursor.getDefaultCursor());
+            }
+        });
+
+        return signOutButton;
     }
 
+    private void showMessage(String message) {
+        JOptionPane.showMessageDialog(null, message);
+    }
 
+    // Method to save user data to the database
+    private void saveUserData(String username, String email, String password) {
+        DatabaseUtils.saveUser(username, email, password);
+    }
+
+    public static void main(String[] args) {
+        new Homepage("John Doe"); // Pass the username when starting the application
+    }
 }
