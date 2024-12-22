@@ -13,8 +13,10 @@ import java.util.List;
 public class AdminHomepage extends JFrame {
     private List<Movie> movies;
     private JPanel movieGridPanel;
+    private String adminName;
 
-    public AdminHomepage() {
+    public AdminHomepage(String AdminName) {
+        this.adminName = AdminName;
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
@@ -89,7 +91,7 @@ public class AdminHomepage extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
-                new AdminHomepage();
+                new AdminHomepage("");
             }
         });
 
@@ -108,8 +110,8 @@ public class AdminHomepage extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Add welcome label
-        JLabel welcomeLabel = new JLabel("Welcome back!");
-        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        JLabel welcomeLabel = new JLabel("Welcome "+adminName+"!");
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
         gbc.anchor = GridBagConstraints.CENTER;
@@ -117,8 +119,12 @@ public class AdminHomepage extends JFrame {
 
         // Add menu buttons
         gbc.anchor = GridBagConstraints.WEST;
-        menuPanel.add(createMenuButton("Homepage", e -> showMessage("Homepage button clicked!")), gbc);
-        menuPanel.add(createMenuButton("Customers", e -> showMessage("Customers button clicked!")), gbc);
+        JComponent homepageButton = createMenuButton("Homepage", e -> {});
+        addMouseListener(homepageButton, () -> {
+            dispose();
+            new AdminHomepage(adminName);
+        });
+        menuPanel.add(homepageButton, gbc);
         menuPanel.add(createMenuButton("Manage Account", e -> showMessage("Manage Account button clicked!")), gbc);
 
         // Add "Add Movie" Button
@@ -280,7 +286,22 @@ public class AdminHomepage extends JFrame {
         movieGridPanel.repaint();
     }
 
-    public static void main(String[] args) {
-        new AdminHomepage(); // Start the application
+    public void addMouseListener(JComponent component, Runnable onClickAction) {
+        component.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                component.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                component.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                onClickAction.run();
+            }
+        });
     }
 }
