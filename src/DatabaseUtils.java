@@ -2,23 +2,26 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class DatabaseUtils {
 
     // Method to establish connection to the database
     public static Connection getConnection() throws SQLException {
-        String url = "jdbc:mysql://127.0.0.1:3306/movei_ticket";
+
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
         String username = "root";
-        String password = "Shabi6264@";
+        String password = "sharafat@321";
         return DriverManager.getConnection(url, username, password);
     }
 
     // Method to save user data into the database
     public static void saveUser(String username, String email, String passwordHash) {
-        String insertSQL = "INSERT INTO users (Username, email, Password) VALUES (?, ?, ?)";
+        String insertSQL = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
 
         try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
@@ -57,3 +60,6 @@ public class DatabaseUtils {
 
 
 }
+
+}
+

@@ -5,6 +5,6 @@ public class Main {
         Homepage interFace1 = new Homepage("");
         //Signup adminHomepage = new Signup();
         //AddMovie addMovie = new AddMovie();
+        //Homepage homepage=new Homepage("");
 }
-
 }
