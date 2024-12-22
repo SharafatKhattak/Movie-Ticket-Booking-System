@@ -56,8 +56,12 @@ public class adminLogin extends JFrame {
                 } else {
                     if (enteredPassword.equals(password1)) {
                         JOptionPane.showMessageDialog(null, "Welcome Back Sharafat.");
+                        dispose();
+                        AdminHomepage adminHomepage = new AdminHomepage();
                     } else if (enteredPassword.equals(password2)) {
                         JOptionPane.showMessageDialog(null, "Welcome Back Shoaib.");
+                        dispose();
+
                     } else {
                         JOptionPane.showMessageDialog(null, "Wrong Password.");
                         password.setText("");
