@@ -27,7 +27,7 @@ public class Homepage extends JFrame {
 
         // Background Panel with Gradient
         JPanel background = createBackgroundPanel();
-        background.setLayout(new BorderLayout());  // Use BorderLayout for main frame
+        background.setLayout(new BorderLayout());
 
         // Add Title Panel
         background.add(createTitlePanel(), BorderLayout.NORTH);
@@ -100,7 +100,7 @@ public class Homepage extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         menuPanel.add(createMenuButton("Dashboard", e -> new Dashboard()), gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
-        menuPanel.add(createMenuButton("My Bookings", e -> new MyBookings()), gbc);
+        menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
         menuPanel.add(createMenuButton("Offers & Discounts", e -> showMessage("Offers & Discounts button clicked!")), gbc);
 
         // Add Sign Up Button
