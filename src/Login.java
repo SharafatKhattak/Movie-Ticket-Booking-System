@@ -119,7 +119,9 @@ public class Login extends JFrame {
                 } else {
                     if (authenticateUser(username, password)) {
                         JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
-                        Homepage homepage=new Homepage();
+                        dispose();
+                        Homepage homepage=new Homepage(username);
+
                         // Proceed to the next screen or functionality
                     } else {
                         JOptionPane.showMessageDialog(Login.this, "Invalid username or password.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -167,16 +169,23 @@ public class Login extends JFrame {
             if (rs.next()) {
                 String storedPasswordHash = rs.getString("password_hash");
 
-                // Hash the provided password and compare with the stored hash
-                return password.equals(storedPasswordHash); // Replace with hashing logic
+                // Compare hashed password (use an actual hashing library like bcrypt here)
+                if (password.equals(storedPasswordHash)) { // Replace with hashed comparison
+                    return true; // Successful login
+                } else {
+                    JOptionPane.showMessageDialog(this, "Incorrect password.", "Error", JOptionPane.ERROR_MESSAGE);
+                    return false; // Incorrect password
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, "Username not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false; // Username not found
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
         }
-
-        return false; // User not found or incorrect password
     }
 
 }
