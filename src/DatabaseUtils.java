@@ -1,36 +1,59 @@
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseUtils {
 
-    // Database credentials
-    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/movei_ticket";
-    private static final String DB_USER = "root"; // Replace with your MySQL username
-    private static final String DB_PASSWORD = "Shabi6264@"; // Replace with your MySQL password
+    // Method to establish connection to the database
+    public static Connection getConnection() throws SQLException {
+        String url = "jdbc:mysql://127.0.0.1:3306/movei_ticket";
+        String username = "root";
+        String password = "Shabi6264@";
+        return DriverManager.getConnection(url, username, password);
+    }
 
-    public static void saveUser(String username, String email, String password) {
-        String insertQuery = "INSERT INTO users (username, email, password_hash) VALUES (?, ?, ?)";
+    // Method to save user data into the database
+    public static void saveUser(String username, String email, String passwordHash) {
+        String insertSQL = "INSERT INTO users (Username, email, Password) VALUES (?, ?, ?)";
 
-        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(insertSQL)) {
 
-            // Set values for the query
-            stmt.setString(1, username);
-            stmt.setString(2, email);
-            stmt.setString(3, password); // Ideally, hash the password here
+            pstmt.setString(1, username);       // Set username
+            pstmt.setString(2, email);          // Set email
+            pstmt.setString(3, passwordHash);   // Set hashed password
 
-            int rowsInserted = stmt.executeUpdate();
-            if (rowsInserted > 0) {
-                System.out.println("User saved successfully!");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            pstmt.executeUpdate();             // Execute the insert query
+
+        } catch (SQLException e) {
+            e.printStackTrace(); // Log the exception (better to use a logger in production)
         }
     }
 
 
+    public static List<String> getMovies() {
+        List<String> movies = new ArrayList<>();
+        String query = "SELECT name, genre FROM movies";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String movie = rs.getString("name") + " (" + rs.getString("genre") + ")";
+                movies.add(movie);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return movies;
+    }
+
 
 
 }
-

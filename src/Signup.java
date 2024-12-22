@@ -98,24 +98,32 @@ public class Signup extends JFrame {
         signUpButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String username = usernameField.getText();
-                String email = emailField.getText();
+                String username = usernameField.getText().trim();
+                String email = emailField.getText().trim();
                 String password = new String(passwordField.getPassword());
                 String confirmPassword = new String(confirmPasswordField.getPassword());
 
                 if (password.equals(confirmPassword)) {
-                    // Hash the password before saving (use a library like bcrypt for this)
-                    String hashedPassword = password; // Replace this with actual hashing logic
+                    try {
 
-                    DatabaseUtils.saveUser(username, email, hashedPassword);
-                    JOptionPane.showMessageDialog(null, "Sign-Up Successful!");
-                    dispose();
-                    Login login = new Login();
+                        String hashedPassword = password;
+
+                        DatabaseUtils.saveUser(username, email, hashedPassword);
+                        JOptionPane.showMessageDialog(null, "Sign-Up Successful!");
+                        dispose();
+                        // Open the Login page (ensure Login class is implemented)
+                        Login login = new Login();
+                        login.setVisible(true);
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "An error occurred while signing up!", "Error", JOptionPane.ERROR_MESSAGE);
+                        ex.printStackTrace();
+                    }
                 } else {
                     JOptionPane.showMessageDialog(null, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
+
 
         cancelButton.addActionListener(new ActionListener() {
             @Override

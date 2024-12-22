@@ -75,14 +75,18 @@ public class Moviedetail extends JFrame {
         rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
         // Book Tickets Button
-        JButton bookButton = new JButton("Book Tickets");
-        bookButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        bookButton.setBackground(new Color(191, 64, 64));
-        bookButton.setForeground(Color.WHITE);
-        bookButton.setFocusPainted(false);
-        bookButton.setPreferredSize(new Dimension(150, 40));
-        bookButton.addActionListener(e -> proceedToBooking(movieTitle)); // Handle booking action here
-        rightPanel.add(bookButton);
+        JButton bookSeatButton = new JButton("Select Seat");
+        bookSeatButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        bookSeatButton.setBackground(new Color(191, 64, 64));
+        bookSeatButton.setForeground(Color.WHITE);
+        bookSeatButton.setFocusPainted(false);
+        bookSeatButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        bookSeatButton.addActionListener(e -> {
+            new SeatSelection(movieTitle, genre, languages, releaseDate).setVisible(true); // Navigate to Seat Selection
+            dispose(); // Close the current window
+        });
+
+        buttonPanel.add(bookSeatButton);
 
         // Spacer
         rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -93,11 +97,6 @@ public class Moviedetail extends JFrame {
 
         // Center the window
         setLocationRelativeTo(null);
-    }
-
-    private void proceedToBooking(String movieTitle) {
-        JOptionPane.showMessageDialog(this, "Proceeding to book tickets for: " + movieTitle);
-        // Add your booking logic here
     }
 
     public static void main(String[] args) {
