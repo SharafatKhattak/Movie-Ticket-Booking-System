@@ -3,10 +3,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class DatabaseUtils {
 
     // Method to establish connection to the database
     public static Connection getConnection() throws SQLException {
+
         String url = "jdbc:mysql://localhost:3306/moviebeats";
         String username = "root";
         String password = "sharafat@321";
@@ -30,4 +36,30 @@ public class DatabaseUtils {
             e.printStackTrace(); // Log the exception (better to use a logger in production)
         }
     }
+
+
+    public static List<String> getMovies() {
+        List<String> movies = new ArrayList<>();
+        String query = "SELECT name, genre FROM movies";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery()) {
+
+            while (rs.next()) {
+                String movie = rs.getString("name") + " (" + rs.getString("genre") + ")";
+                movies.add(movie);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return movies;
+    }
+
+
+
 }
+
+}
+

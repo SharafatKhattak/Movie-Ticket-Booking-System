@@ -1,13 +1,31 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Set;
 
 public class SeatSelection extends JFrame {
+    private Set<String> selectedSeats = new HashSet<>();
+    private boolean[][] seatAvailability;
+    private static final int ROWS = 5;
+    private static final int COLS = 5;
 
-    private String selectedSeat = null;
+    // Movie Details to display on the seat selection page
+    private String movieTitle;
+    private String genre;
+    private String language;
+    private String releaseDate;
 
-    public SeatSelection(String movieTitle) {
+    public SeatSelection(String movieTitle, String genre, String language, String releaseDate) {
+        // Set movie details received from Moviedetail page
+        this.movieTitle = movieTitle;
+        this.genre = genre;
+        this.language = language;
+        this.releaseDate = releaseDate;
+
+        // Initialize seat availability (true = booked, false = available)
+        seatAvailability = new boolean[ROWS][COLS];
+        initializeSeats();
+
         // Frame settings
         setTitle("Seat Selection for " + movieTitle);
         setSize(500, 500);
@@ -17,7 +35,7 @@ public class SeatSelection extends JFrame {
         // Title Panel
         JPanel titlePanel = new JPanel();
         titlePanel.setBackground(new Color(30, 30, 30));
-        JLabel titleLabel = new JLabel("Select Your Seat");
+        JLabel titleLabel = new JLabel("Select Your Seats");
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         titleLabel.setForeground(Color.WHITE);
         titlePanel.add(titleLabel);
@@ -25,24 +43,35 @@ public class SeatSelection extends JFrame {
 
         // Seats Panel (Grid Layout for Seats)
         JPanel seatsPanel = new JPanel();
-        seatsPanel.setLayout(new GridLayout(5, 5, 10, 10)); // 5 rows and 5 columns
+        seatsPanel.setLayout(new GridLayout(ROWS, COLS, 10, 10));
         seatsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         seatsPanel.setBackground(Color.BLACK);
 
-        // Create seat buttons
-        for (int row = 1; row <= 5; row++) {
-            for (int col = 1; col <= 5; col++) {
-                String seatNumber = "R" + row + "C" + col;
+        // Create seat buttons dynamically
+        for (int row = 0; row < ROWS; row++) {
+            for (int col = 0; col < COLS; col++) {
+                String seatNumber = "R" + (row + 1) + "C" + (col + 1);
                 JButton seatButton = new JButton(seatNumber);
-                seatButton.setBackground(Color.GREEN);
+
+                if (seatAvailability[row][col]) {
+                    seatButton.setBackground(Color.RED);
+                    seatButton.setEnabled(false);
+                } else {
+                    seatButton.setBackground(Color.GREEN);
+                }
+
                 seatButton.setForeground(Color.BLACK);
                 seatButton.setFocusPainted(false);
 
-                // Add action listener for seat selection
+                final int selectedRow = row;
+                final int selectedCol = col;
                 seatButton.addActionListener(e -> {
-                    if (selectedSeat == null || !selectedSeat.equals(seatNumber)) {
-                        selectedSeat = seatNumber;
-                        updateSeatColors(seatsPanel, seatButton); // Update UI to show selected seat
+                    if (selectedSeats.contains(seatNumber)) {
+                        selectedSeats.remove(seatNumber);
+                        seatButton.setBackground(Color.GREEN);
+                    } else {
+                        selectedSeats.add(seatNumber);
+                        seatButton.setBackground(Color.YELLOW);
                     }
                 });
 
@@ -61,70 +90,62 @@ public class SeatSelection extends JFrame {
         proceedButton.setForeground(Color.WHITE);
         proceedButton.setFocusPainted(false);
 
-        // Action for Proceed Button
         proceedButton.addActionListener(e -> {
-            if (selectedSeat != null) {
-                showConfirmation(movieTitle, selectedSeat);
+            if (!selectedSeats.isEmpty()) {
+                showConfirmation();
             } else {
-                JOptionPane.showMessageDialog(this, "Please select a seat before proceeding.");
+                JOptionPane.showMessageDialog(this, "Please select at least one seat before proceeding.");
             }
         });
 
         proceedPanel.add(proceedButton);
         add(proceedPanel, BorderLayout.SOUTH);
 
-        // Center the window
         setLocationRelativeTo(null);
     }
 
-    private void updateSeatColors(JPanel seatsPanel, JButton selectedButton) {
-        // Reset all buttons to green, then set the selected button to yellow
-        Component[] components = seatsPanel.getComponents();
-        for (Component comp : components) {
-            if (comp instanceof JButton) {
-                ((JButton) comp).setBackground(Color.GREEN);
-            }
-        }
-        selectedButton.setBackground(Color.YELLOW);
+    private void initializeSeats() {
+        // Example seat initialization (booked and available)
+        seatAvailability[0][0] = true; // Booked seat
+        seatAvailability[1][1] = true; // Booked seat
     }
 
-    private void showConfirmation(String movieTitle, String seatNumber) {
-        // Confirmation Dialog
-        JDialog confirmationDialog = new JDialog(this, "Ticket Confirmation", true);
-        confirmationDialog.setSize(400, 300);
+    private void showConfirmation() {
+        // Create the confirmation dialog
+        JDialog confirmationDialog = new JDialog(this, "Booking Confirmation", true);
+        confirmationDialog.setSize(400, 400);
         confirmationDialog.setLayout(new BorderLayout());
 
-        // Confirmation Message
+        // Create a panel for displaying movie and seat details
         JPanel messagePanel = new JPanel();
-        messagePanel.setBackground(Color.WHITE);
         messagePanel.setLayout(new BoxLayout(messagePanel, BoxLayout.Y_AXIS));
         messagePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel confirmationLabel = new JLabel("Your ticket is confirmed!");
-        confirmationLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        confirmationLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
         JLabel movieLabel = new JLabel("Movie: " + movieTitle);
-        movieLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        movieLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel seatLabel = new JLabel("Seat: " + seatNumber);
-        seatLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        seatLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        JLabel thankYouLabel = new JLabel("Thank you for booking with us!");
-        thankYouLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        thankYouLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-        // Add labels to panel
-        messagePanel.add(confirmationLabel);
-        messagePanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        movieLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         messagePanel.add(movieLabel);
-        messagePanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        messagePanel.add(seatLabel);
-        messagePanel.add(Box.createRigidArea(new Dimension(0, 20)));
-        messagePanel.add(thankYouLabel);
 
+        JLabel genreLabel = new JLabel("Genre: " + genre);
+        genreLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        messagePanel.add(genreLabel);
+
+        JLabel languageLabel = new JLabel("Language: " + language);
+        languageLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        messagePanel.add(languageLabel);
+
+        JLabel dateLabel = new JLabel("Date: " + releaseDate);
+        dateLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        messagePanel.add(dateLabel);
+
+        JLabel seatLabel = new JLabel("Selected Seats: " + String.join(", ", selectedSeats));
+        seatLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        messagePanel.add(seatLabel);
+
+        JLabel confirmationLabel = new JLabel("Your booking is confirmed!");
+        confirmationLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        messagePanel.add(confirmationLabel);
+
+        // Add the message panel to the dialog
         confirmationDialog.add(messagePanel, BorderLayout.CENTER);
 
         // Close Button
@@ -136,15 +157,14 @@ public class SeatSelection extends JFrame {
 
         confirmationDialog.add(closePanel, BorderLayout.SOUTH);
 
-        // Show dialog
+        // Show the confirmation dialog
         confirmationDialog.setLocationRelativeTo(this);
         confirmationDialog.setVisible(true);
     }
 
     public static void main(String[] args) {
-        // Test the Seat Selection Page
         SwingUtilities.invokeLater(() -> {
-            SeatSelection seatPage = new SeatSelection("THE IRON MAN");
+            SeatSelection seatPage = new SeatSelection("THE IRON MAN", "Action", "English", "2024-12-22");
             seatPage.setVisible(true);
         });
     }
