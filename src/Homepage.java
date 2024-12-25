@@ -2,18 +2,18 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Homepage extends JFrame {
 
-    private String username; // Store the username
+    private String username;
 
     // Database connection details
-    private static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/movei_ticket";
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/moviebeats";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "Shabi6264@";
+    private static final String DB_PASSWORD = "sharafat@321";
 
     public Homepage(String username) {
         this.username = username; // Set the username
@@ -98,18 +98,10 @@ public class Homepage extends JFrame {
 
         // Add menu buttons
         gbc.anchor = GridBagConstraints.WEST;
-        menuPanel.add(createMenuButton("Dashboard", e -> new Dashboard()), gbc);
+        menuPanel.add(createMenuButton("Homepage", e -> new Dashboard()), gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
         menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
         menuPanel.add(createMenuButton("Offers & Discounts", e -> showMessage("Offers & Discounts button clicked!")), gbc);
-
-        // Add Sign Up Button
-        menuPanel.add(createMenuButton("Sign Up", e -> {
-            // Sample user data - Replace with actual data from your form
-            saveUserData("newUser", "newUser@example.com", "newUserPassword123");
-        }), gbc);
-
-        menuPanel.add(createMenuButton("View Account", e -> new ViewAccount()), gbc);
 
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
@@ -124,19 +116,20 @@ public class Homepage extends JFrame {
         movieGridPanel.setLayout(new GridLayout(3, 3, 10, 10)); // 3x3 grid with gaps
         movieGridPanel.setOpaque(false); // Make the parent container transparent
 
-        for (int i = 0; i < 9; i++) {
-            movieGridPanel.add(createMoviePanel("Movie " + (i + 1)));
+        List<Movie> movies = fetchMoviesFromDatabase(); // Fetch movies from the database
+        for (Movie movie : movies) {
+            movieGridPanel.add(createMoviePanel(movie));
         }
 
         return movieGridPanel;
     }
 
-    private JPanel createMoviePanel(String movieName) {
+    private JPanel createMoviePanel(Movie movie) {
         JPanel moviePanel = new JPanel();
         moviePanel.setLayout(new BorderLayout());
         moviePanel.setBackground(new Color(0, 0, 0, 150)); // semi-transparent background
 
-        JLabel posterLabel = new JLabel(new ImageIcon(getClass().getResource(""))); // Placeholder for movie poster
+        JLabel posterLabel = new JLabel(new ImageIcon(movie.getPosterPath())); // Movie poster
         moviePanel.add(posterLabel, BorderLayout.CENTER);
 
         JButton bookButton = new JButton("Book");
@@ -145,7 +138,7 @@ public class Homepage extends JFrame {
         bookButton.setForeground(Color.WHITE);
         bookButton.setFocusPainted(false);
         bookButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        bookButton.addActionListener(e -> (new Moviedetail("The Iron Men", "English", "3:00 hr", "Local", "25-5-2019")).setVisible(true));
+        bookButton.addActionListener(e -> new Moviedetail(movie.getMovieName(), "English", "3:00 hr", "Local", "25-5-2019").setVisible(true));
 
         // Change cursor to hand when mouse enters the button
         bookButton.addMouseListener(new MouseAdapter() {
@@ -222,12 +215,27 @@ public class Homepage extends JFrame {
         JOptionPane.showMessageDialog(null, message);
     }
 
-    // Method to save user data to the database
-    private void saveUserData(String username, String email, String password) {
-        DatabaseUtils.saveUser(username, email, password);
-    }
+    private List<Movie> fetchMoviesFromDatabase() {
+        List<Movie> movies = new ArrayList<>();
+        String query = "SELECT id, movieName, posterPath FROM movies";
 
-    public static void main(String[] args) {
-        new Homepage("John Doe"); // Pass the username when starting the application
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String movieName = rs.getString("movieName");
+                String posterPath = rs.getString("posterPath");
+                movies.add(new Movie(id, movieName, posterPath));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error fetching movies from database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return movies;
     }
 }
