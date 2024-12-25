@@ -125,7 +125,12 @@ public class AdminHomepage extends JFrame {
             new AdminHomepage(adminName);
         });
         menuPanel.add(homepageButton, gbc);
-        menuPanel.add(createMenuButton("Manage Account", e -> showMessage("Manage Account button clicked!")), gbc);
+        JComponent manageAccount = createMenuButton("ManageAccount", e -> {});
+        addMouseListener(manageAccount, () -> {
+            new ManageAccount(adminName,true);
+        });
+        menuPanel.add(manageAccount, gbc);
+
 
         // Add "Add Movie" Button
         gbc.anchor = GridBagConstraints.CENTER;
@@ -244,8 +249,8 @@ public class AdminHomepage extends JFrame {
     private List<Movie> fetchMoviesFromDatabase() {
         List<Movie> movies = new ArrayList<>();
         String url = "jdbc:mysql://localhost:3306/moviebeats";
-        String user = "root"; // Replace with your MySQL username
-        String password = "sharafat@321"; // Replace with your MySQL password
+        String user = "root";
+        String password = "sharafat@321";
 
         String query = "SELECT id, movieName, posterPath FROM movies";
 

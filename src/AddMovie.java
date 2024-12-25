@@ -2,10 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class AddMovie extends JFrame {
     private JTextField txtMovieName;
@@ -91,16 +88,22 @@ public class AddMovie extends JFrame {
         String query = "INSERT INTO movies (movieName, posterPath) VALUES (?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
+             PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, movieName);
             stmt.setString(2, posterPath);
             stmt.executeUpdate();
 
-            JOptionPane.showMessageDialog(null,
-                    "Movie saved successfully!",
-                    "Success",
-                    JOptionPane.INFORMATION_MESSAGE);
+            // Retrieve the generated keys
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                if (generatedKeys.next()) {
+                    int generatedId = generatedKeys.getInt(1);
+                    JOptionPane.showMessageDialog(null,
+                            "Movie saved successfully! Generated Movie ID: " + generatedId,
+                            "Success",
+                            JOptionPane.INFORMATION_MESSAGE);
+                }
+            }
 
             // Notify AdminHomepage
             if (onMovieAdded != null) {
