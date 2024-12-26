@@ -151,11 +151,11 @@ public class Login extends JFrame {
     }
 
     private boolean authenticateUser(String username, String password) {
-        String dbUrl = "jdbc:mysql://localhost:3306/moviebeats"; // Database URL
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/movei_ticket"; // Database URL
         String dbUser = "root"; // Replace with your MySQL username
-        String dbPassword = "sharafat@321"; // Replace with your MySQL password
+        String dbPassword = "Shabi6264@"; // Replace with your MySQL password
 
-        String query = "SELECT password_hash FROM users WHERE username = ?";
+        String query = "SELECT Password FROM users WHERE Username = ?";
 
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -167,7 +167,7 @@ public class Login extends JFrame {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                String storedPasswordHash = rs.getString("password_hash");
+                String storedPasswordHash = rs.getString("Password");
 
                 // Compare hashed password (use an actual hashing library like bcrypt here)
                 if (password.equals(storedPasswordHash)) { // Replace with hashed comparison
@@ -189,5 +189,3 @@ public class Login extends JFrame {
     }
 
 }
-
-

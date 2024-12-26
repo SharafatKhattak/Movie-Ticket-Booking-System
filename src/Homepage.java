@@ -99,7 +99,7 @@ public class Homepage extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         menuPanel.add(createMenuButton("Homepage", e -> new Dashboard()), gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
-        menuPanel.add(createMenuButton("My Bookings", e -> new MyBookings()), gbc);
+        menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
         menuPanel.add(createMenuButton("Offers & Discounts", e -> showMessage("Offers & Discounts button clicked!")), gbc);
 
         // Add Sign Out Button at the bottom
