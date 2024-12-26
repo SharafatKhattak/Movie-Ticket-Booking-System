@@ -7,6 +7,8 @@ import java.sql.*;
 public class AddMovie extends JFrame {
     private JTextField txtMovieName;
     private JTextField txtPosterPath;
+    private JTextField txtGenre;
+    private JTextField txtShowingDate;
     private Runnable onMovieAdded;
 
     public AddMovie(Runnable onMovieAdded) {
@@ -15,7 +17,7 @@ public class AddMovie extends JFrame {
         setTitle("Add Movie");
         ImageIcon logo = new ImageIcon(getClass().getResource("/Logo.png"));
         setIconImage(logo.getImage());
-        setSize(550, 500);
+        setSize(550, 600); // Increased size to accommodate new fields
         setLocationRelativeTo(null);
         setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -55,9 +57,31 @@ public class AddMovie extends JFrame {
         txtPosterPath.setBounds(180, 100, 300, 30);
         add(txtPosterPath);
 
+        // Label for Genre
+        JLabel lblGenre = new JLabel("Enter Genre:");
+        lblGenre.setBounds(20, 150, 150, 30);
+        lblGenre.setForeground(Color.white);
+        add(lblGenre);
+
+        // Text Field for Genre
+        txtGenre = new JTextField();
+        txtGenre.setBounds(180, 150, 300, 30);
+        add(txtGenre);
+
+        // Label for Showing Date
+        JLabel lblShowingDate = new JLabel("Enter Showing Date:");
+        lblShowingDate.setBounds(20, 200, 150, 30);
+        lblShowingDate.setForeground(Color.white);
+        add(lblShowingDate);
+
+        // Text Field for Showing Date
+        txtShowingDate = new JTextField();
+        txtShowingDate.setBounds(180, 200, 300, 30);
+        add(txtShowingDate);
+
         // Submit Button
         JButton btnSubmit = new JButton("Submit");
-        btnSubmit.setBounds(200, 150, 100, 30);
+        btnSubmit.setBounds(200, 250, 100, 30);
         add(btnSubmit);
 
         // Action Listener for Submit Button
@@ -66,32 +90,36 @@ public class AddMovie extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String movieName = txtMovieName.getText().trim();
                 String posterPath = txtPosterPath.getText().trim();
+                String genre = txtGenre.getText().trim();
+                String showingDate = txtShowingDate.getText().trim();
 
-                // Check if both fields are filled
-                if (movieName.isEmpty() || posterPath.isEmpty()) {
+                // Check if all fields are filled
+                if (movieName.isEmpty() || posterPath.isEmpty() || genre.isEmpty() || showingDate.isEmpty()) {
                     JOptionPane.showMessageDialog(null,
-                            "Both fields are required!",
+                            "All fields are required!",
                             "Input Error",
                             JOptionPane.ERROR_MESSAGE);
                 } else {
-                    saveToDatabase(movieName, posterPath);
+                    saveToDatabase(movieName, posterPath, genre, showingDate);
                 }
             }
         });
     }
 
-    private void saveToDatabase(String movieName, String posterPath) {
+    private void saveToDatabase(String movieName, String posterPath, String genre, String showingDate) {
         String url = "jdbc:mysql://localhost:3306/moviebeats";
         String user = "root";
         String password = "sharafat@321";
 
-        String query = "INSERT INTO movies (movieName, posterPath) VALUES (?, ?)";
+        String query = "INSERT INTO movies (movieName, posterPath, genre, showing_date) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
              PreparedStatement stmt = conn.prepareStatement(query, PreparedStatement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, movieName);
             stmt.setString(2, posterPath);
+            stmt.setString(3, genre);
+            stmt.setString(4, showingDate);
             stmt.executeUpdate();
 
             // Retrieve the generated keys
@@ -120,6 +148,7 @@ public class AddMovie extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
         }
     }
+
     private JPanel setBackgroundPanel() {
         return new JPanel() {
             @Override

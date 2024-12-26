@@ -7,5 +7,6 @@ public class Main {
         //AdminHomepage adminHomepage = new AdminHomepage();
         //AddMovie addMovie = new AddMovie();
         //Homepage homepage=new Homepage("");
+
 }
 }
