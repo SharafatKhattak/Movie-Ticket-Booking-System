@@ -3,7 +3,7 @@ import java.awt.*;
 
 public class Moviedetail extends JFrame {
 
-    public Moviedetail(String movieTitle, String languages, String duration, String genre, String releaseDate) {
+    public Moviedetail(String movieTitle, String genre, String showingDate, String posterPath) {
         // Frame settings
         setTitle(movieTitle + " Details");
         setSize(900, 600);
@@ -14,7 +14,14 @@ public class Moviedetail extends JFrame {
         JPanel leftPanel = new JPanel();
         leftPanel.setBackground(Color.BLACK);
         leftPanel.setPreferredSize(new Dimension(300, 600));
-        JLabel posterLabel = new JLabel(new ImageIcon("C:\\Users\\DEll\\Movie-Ticket-Booking-System\\src\\IRON MAN 3.jpg")); // Replace with your poster path
+
+        // Load and resize the image
+        ImageIcon originalIcon = new ImageIcon(posterPath);
+        Image originalImage = originalIcon.getImage();
+        Image resizedImage = originalImage.getScaledInstance(300, 600, Image.SCALE_SMOOTH);
+        ImageIcon resizedIcon = new ImageIcon(resizedImage);
+
+        JLabel posterLabel = new JLabel(resizedIcon);
         leftPanel.add(posterLabel);
 
         // Right panel for movie details
@@ -56,20 +63,11 @@ public class Moviedetail extends JFrame {
         // Spacer
         rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
 
-        // Language and Genre
-        JLabel detailsLabel = new JLabel("Languages: " + languages + " | Duration: " + duration + " | Genre: " + genre);
+        // Genre and Showing Date
+        JLabel detailsLabel = new JLabel("Genre: " + genre + " | Showing Date: " + showingDate);
         detailsLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         detailsLabel.setForeground(Color.LIGHT_GRAY);
         rightPanel.add(detailsLabel);
-
-        // Spacer
-        rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        // Release date
-        JLabel releaseDateLabel = new JLabel("Releasing on: " + releaseDate);
-        releaseDateLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        releaseDateLabel.setForeground(Color.LIGHT_GRAY);
-        rightPanel.add(releaseDateLabel);
 
         // Spacer
         rightPanel.add(Box.createRigidArea(new Dimension(0, 20)));
@@ -82,7 +80,7 @@ public class Moviedetail extends JFrame {
         bookSeatButton.setFocusPainted(false);
         bookSeatButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         bookSeatButton.addActionListener(e -> {
-            new SeatSelection(movieTitle, genre, languages, releaseDate).setVisible(true); // Navigate to Seat Selection
+            new SeatSelection(movieTitle, genre, showingDate).setVisible(true); // Navigate to Seat Selection
             dispose(); // Close the current window
         });
 
@@ -97,19 +95,5 @@ public class Moviedetail extends JFrame {
 
         // Center the window
         setLocationRelativeTo(null);
-    }
-
-    public static void main(String[] args) {
-        // Test the MovieDetailsPage
-        SwingUtilities.invokeLater(() -> {
-            Moviedetail detailsPage = new Moviedetail(
-                    "UI (2024)",
-                    "Kannada, Hindi, Tamil, Telugu, Malayalam",
-                    "2h 12m",
-                    "Action, Sci-Fi, Thriller",
-                    "20 Dec, 2024"
-            );
-            detailsPage.setVisible(true);
-        });
     }
 }

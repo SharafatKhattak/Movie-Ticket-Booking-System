@@ -9,7 +9,6 @@ import java.util.List;
 public class Homepage extends JFrame {
 
     private String username;
-
     // Database connection details
     private static final String DB_URL = "jdbc:mysql://localhost:3306/moviebeats";
     private static final String DB_USER = "root";
@@ -138,8 +137,7 @@ public class Homepage extends JFrame {
         bookButton.setForeground(Color.WHITE);
         bookButton.setFocusPainted(false);
         bookButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        bookButton.addActionListener(e -> new Moviedetail(movie.getMovieName(), "English", "3:00 hr", "Local", "25-5-2019").setVisible(true));
-
+        bookButton.addActionListener(e -> new Moviedetail(movie.getMovieName(), movie.getGenre(), movie.getShowingDate(), movie.getPosterPath()).setVisible(true));
         // Change cursor to hand when mouse enters the button
         bookButton.addMouseListener(new MouseAdapter() {
             @Override
@@ -217,7 +215,7 @@ public class Homepage extends JFrame {
 
     private List<Movie> fetchMoviesFromDatabase() {
         List<Movie> movies = new ArrayList<>();
-        String query = "SELECT id, movieName, posterPath FROM movies";
+        String query = "SELECT id, movieName, posterPath, genre, showing_date FROM movies";
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
              PreparedStatement stmt = conn.prepareStatement(query);
@@ -226,7 +224,9 @@ public class Homepage extends JFrame {
                 int id = rs.getInt("id");
                 String movieName = rs.getString("movieName");
                 String posterPath = rs.getString("posterPath");
-                movies.add(new Movie(id, movieName, posterPath));
+                String genre = rs.getString("genre");
+                String showingDate = rs.getString("showing_date");
+                movies.add(new Movie(id, movieName, posterPath, genre, showingDate));
             }
         } catch (SQLException ex) {
             ex.printStackTrace();

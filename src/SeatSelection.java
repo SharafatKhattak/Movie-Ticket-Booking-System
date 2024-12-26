@@ -15,7 +15,7 @@ public class SeatSelection extends JFrame {
     private String language;
     private String releaseDate;
 
-    public SeatSelection(String movieTitle, String genre, String language, String releaseDate) {
+    public SeatSelection(String movieTitle, String genre,String showingDate) {
         // Set movie details received from Moviedetail page
         this.movieTitle = movieTitle;
         this.genre = genre;
@@ -162,10 +162,4 @@ public class SeatSelection extends JFrame {
         confirmationDialog.setVisible(true);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            SeatSelection seatPage = new SeatSelection("THE IRON MAN", "Action", "English", "2024-12-22");
-            seatPage.setVisible(true);
-        });
-    }
 }

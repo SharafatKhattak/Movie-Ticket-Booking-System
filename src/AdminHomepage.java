@@ -252,17 +252,19 @@ public class AdminHomepage extends JFrame {
         String user = "root";
         String password = "sharafat@321";
 
-        String query = "SELECT id, movieName, posterPath FROM movies";
+        String query = "SELECT id, movieName, posterPath, genre, showing_date FROM movies";
 
         try (Connection conn = DriverManager.getConnection(url, user, password);
              PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {while (rs.next()) {
-            int id = rs.getInt("id");
-            String movieName = rs.getString("movieName");
-            String posterPath = rs.getString("posterPath");
-            movies.add(new Movie(id, movieName, posterPath));
-        }
-
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String movieName = rs.getString("movieName");
+                String posterPath = rs.getString("posterPath");
+                String genre = rs.getString("genre");
+                String showingDate = rs.getString("showing_date");
+                movies.add(new Movie(id, movieName, posterPath, genre, showingDate));
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null,
