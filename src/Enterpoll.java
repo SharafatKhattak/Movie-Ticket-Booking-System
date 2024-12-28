@@ -1,13 +1,20 @@
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+import java.util.Vector;
 
 public class Enterpoll extends JFrame {
+
+    private JComboBox<String> movieComboBox;
+    private JTextField movieTextField;
 
     public Enterpoll() {
         setTitle("Enter a Poll - Movie Booking System");
         initializePage("Enter a Poll",
                 "<html>Participate in a poll to help us improve!<br>"
-                        + "Choose your favorite genre:</html>");
+                        + "Enter your favorite movie and submit your vote:</html>");
     }
 
     private void initializePage(String heading, String question) {
@@ -38,7 +45,7 @@ public class Enterpoll extends JFrame {
         };
     }
 
-    private JPanel createTitlePanel(String titleText) {
+   private JPanel createTitlePanel(String titleText) {
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         titlePanel.setOpaque(false);
 
@@ -51,41 +58,111 @@ public class Enterpoll extends JFrame {
     }
 
     private JPanel createPollPanel(String question) {
+        // Main poll panel
         JPanel pollPanel = new JPanel();
-        pollPanel.setOpaque(false);
-        pollPanel.setLayout(new BoxLayout(pollPanel, BoxLayout.Y_AXIS));
+        pollPanel.setOpaque(false); // Transparent background
+        pollPanel.setLayout(new GridBagLayout()); // Fine-grained control of component placement
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5); // Minimal spacing
+        gbc.gridx = 0;
+        gbc.gridy = 0;
 
-        JLabel questionLabel = new JLabel(question);
+        // Question label
+       JLabel questionLabel = new JLabel(question);
         questionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
         questionLabel.setForeground(Color.LIGHT_GRAY);
-        questionLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        pollPanel.add(questionLabel, gbc);
 
-        pollPanel.add(Box.createVerticalStrut(30)); // Spacer
-        pollPanel.add(questionLabel);
+        // Text field for movie input
+       movieTextField = new JTextField(20);
+        movieTextField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        movieTextField.addActionListener(e -> fetchSuggestions(movieTextField.getText()));
+        gbc.gridy++;
+        pollPanel.add(movieTextField, gbc);
 
-        String[] options = {"Action", "Comedy", "Drama", "Horror", "Sci-Fi"};
-        ButtonGroup group = new ButtonGroup();
+        // Combo box for suggestions
+        movieComboBox = new JComboBox<>();
+        movieComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 16));
+        movieComboBox.setEditable(false);
+        movieComboBox.addActionListener(e -> {
+            String selectedMovie = (String) movieComboBox.getSelectedItem();
+            if (selectedMovie != null) {
+                movieTextField.setText(selectedMovie);
+            }
+        });
+        gbc.gridy++;
+        pollPanel.add(movieComboBox, gbc);
 
-        for (String option : options) {
-            JRadioButton radioButton = new JRadioButton(option);
-            radioButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-            radioButton.setForeground(Color.WHITE);
-            radioButton.setOpaque(false);
-            group.add(radioButton);
-            pollPanel.add(radioButton);
-        }
-
-        JButton submitButton = new JButton("Submit");
+        // Submit button
+        JButton submitButton = new JButton("Submit Vote");
         submitButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         submitButton.setBackground(new Color(191, 64, 64));
         submitButton.setForeground(Color.WHITE);
         submitButton.setFocusPainted(false);
         submitButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        submitButton.addActionListener(e -> JOptionPane.showMessageDialog(this, "Thank you for participating!"));
-
-        pollPanel.add(Box.createVerticalStrut(20)); // Spacer
-        pollPanel.add(submitButton);
+        submitButton.addActionListener(e -> submitVote(movieTextField.getText()));
+        gbc.gridy++;
+        pollPanel.add(submitButton, gbc);
 
         return pollPanel;
     }
+
+
+    private void fetchSuggestions(String userInput) {
+        if (userInput.isEmpty()) {
+            return;
+        }
+
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "Shabi6264@";
+
+        String query = "SELECT movie_name FROM poll_votes WHERE movie_name LIKE ? LIMIT 10";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setString(1, "%" + userInput + "%");
+            ResultSet rs = stmt.executeQuery();
+
+            Vector<String> suggestions = new Vector<>();
+            while (rs.next()) {
+                suggestions.add(rs.getString("movie_name"));
+            }
+
+            movieComboBox.setModel(new DefaultComboBoxModel<>(suggestions));
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error fetching suggestions from the database!");
+        }
+    }
+
+    private void submitVote(String movieName) {
+        if (movieName == null || movieName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid movie name!");
+            return;
+        }
+
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "Shabi6264@";
+
+        String insertQuery = "INSERT INTO poll_votes (movie_name, votes) VALUES (?, 1) "
+                + "ON DUPLICATE KEY UPDATE votes = votes + 1";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
+
+            stmt.setString(1, movieName.trim());
+            stmt.executeUpdate();
+
+            JOptionPane.showMessageDialog(this, "Thank you for voting!");
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error submitting your vote. Please try again!");
+        }
+    }
+
 }

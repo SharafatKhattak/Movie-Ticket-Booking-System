@@ -13,9 +13,9 @@ public class DatabaseUtils {
     // Method to establish connection to the database
     public static Connection getConnection() throws SQLException {
 
-        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String url = "jdbc:mysql://127.0.0.1:3306/moviebeats";
         String username = "root";
-        String password = "sharafat@321";
+        String password = "Shabi6264@";
         return DriverManager.getConnection(url, username, password);
     }
 
@@ -38,28 +38,4 @@ public class DatabaseUtils {
     }
 
 
-    public static List<String> getMovies() {
-        List<String> movies = new ArrayList<>();
-        String query = "SELECT name, genre FROM movies";
-
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                String movie = rs.getString("name") + " (" + rs.getString("genre") + ")";
-                movies.add(movie);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return movies;
-    }
-
-
-
 }
-
-}
-

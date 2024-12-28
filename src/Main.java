@@ -2,7 +2,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Homepage interFace1 = new Homepage("");
+       InterFace1 interFace1 = new InterFace1();
         //Signup adminHomepage = new Signup();
         //AddMovie addMovie = new AddMovie();
         //Homepage homepage=new Homepage("");

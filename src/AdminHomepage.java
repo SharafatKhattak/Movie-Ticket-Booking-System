@@ -2,16 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class AdminHomepage extends JFrame {
     private List<Movie> movies;
+    private List<Moveivotes> pollResults;  // Store poll results
     private JPanel movieGridPanel;
     private String adminName;
 
@@ -24,8 +21,9 @@ public class AdminHomepage extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
 
-        // Fetch movies from the database
+        // Fetch movies and poll results from the database
         movies = fetchMoviesFromDatabase();
+        pollResults = fetchPollResultsFromDatabase();  // Fetch poll results
 
         // Background Panel with Gradient
         JPanel background = createBackgroundPanel();
@@ -125,7 +123,11 @@ public class AdminHomepage extends JFrame {
             new AdminHomepage(adminName);
         });
         menuPanel.add(homepageButton, gbc);
-        menuPanel.add(createMenuButton("Manage Account", e -> showMessage("Manage Account button clicked!")), gbc);
+        JComponent manageAccount = createMenuButton("ManageAccount", e -> {});
+        addMouseListener(manageAccount, () -> {
+            //new ManageAccount(adminName,true);
+        });
+        menuPanel.add(manageAccount, gbc);
 
         // Add "Add Movie" Button
         gbc.anchor = GridBagConstraints.CENTER;
@@ -134,6 +136,10 @@ public class AdminHomepage extends JFrame {
         // Add "Delete Movie" Button
         gbc.anchor = GridBagConstraints.CENTER;
         menuPanel.add(createMenuButton("Delete Movie", e -> new DeleteMovie(this::refreshMovies)), gbc);
+
+        // Add Poll button
+        gbc.anchor = GridBagConstraints.CENTER;
+        menuPanel.add(createMenuButton("Show Poll", e -> showPollResults()), gbc);
 
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
@@ -181,6 +187,92 @@ public class AdminHomepage extends JFrame {
         JPanel emptyPanel = new JPanel();
         emptyPanel.setBackground(new Color(0, 0, 0, 0)); // Fully transparent background
         return emptyPanel;
+    }
+
+
+
+    private List<Movie> fetchMoviesFromDatabase() {
+        List<Movie> movies = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "Shabi6264@";
+
+        String query = "SELECT id, movieName, posterPath, genre, showing_date FROM movies";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String movieName = rs.getString("movieName");
+                String posterPath = rs.getString("posterPath");
+                String genre = rs.getString("genre");
+                String showingDate = rs.getString("showing_date");
+                movies.add(new Movie(id, movieName, posterPath, genre, showingDate));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error fetching movies from database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return movies;
+    }
+
+    private List<Moveivotes> fetchPollResultsFromDatabase() {
+        List<Moveivotes> pollResults = new ArrayList<>();
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "Shabi6264@";
+
+        String query = "SELECT movie_name, votes FROM poll_votes";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query);
+             ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                String movieName = rs.getString("movie_name");
+                int votes = rs.getInt("votes");
+                pollResults.add(new Moveivotes(movieName, votes));
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error fetching poll results from database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return pollResults;
+    }
+
+    private void refreshMovies() {
+        movies = fetchMoviesFromDatabase();
+        movieGridPanel.removeAll();
+        for (Movie movie : movies) {
+            movieGridPanel.add(createMoviePanel(movie));
+        }
+
+        // Add empty panels to fill the grid if there are less than 9 movies
+        int emptyPanels = 9 - movies.size();
+        for (int i = 0; i < emptyPanels; i++) {
+            movieGridPanel.add(createEmptyPanel());
+        }
+
+        movieGridPanel.revalidate();
+        movieGridPanel.repaint();
+    }
+
+    private void showPollResults() {
+        // Show poll results in a dialog or a new window
+        StringBuilder pollData = new StringBuilder("Poll Results:\n");
+        for (Moveivotes vote : pollResults) {
+            pollData.append(vote.getMovieName()).append(": ").append(vote.getVotes()).append(" votes\n");
+        }
+
+        JOptionPane.showMessageDialog(this, pollData.toString(), "Poll Results", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private JButton createMenuButton(String name, java.awt.event.ActionListener action) {
@@ -237,55 +329,6 @@ public class AdminHomepage extends JFrame {
         return signOutButton;
     }
 
-    private void showMessage(String message) {
-        JOptionPane.showMessageDialog(null, message);
-    }
-
-    private List<Movie> fetchMoviesFromDatabase() {
-        List<Movie> movies = new ArrayList<>();
-        String url = "jdbc:mysql://localhost:3306/moviebeats";
-        String user = "root"; // Replace with your MySQL username
-        String password = "sharafat@321"; // Replace with your MySQL password
-
-        String query = "SELECT id, movieName, posterPath FROM movies";
-
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(query);
-             ResultSet rs = stmt.executeQuery()) {while (rs.next()) {
-            int id = rs.getInt("id");
-            String movieName = rs.getString("movieName");
-            String posterPath = rs.getString("posterPath");
-            movies.add(new Movie(id, movieName, posterPath));
-        }
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null,
-                    "Error fetching movies from database!",
-                    "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-
-        return movies;
-    }
-
-    private void refreshMovies() {
-        movies = fetchMoviesFromDatabase();
-        movieGridPanel.removeAll();
-        for (Movie movie : movies) {
-            movieGridPanel.add(createMoviePanel(movie));
-        }
-
-        // Add empty panels to fill the grid if there are less than 9 movies
-        int emptyPanels = 9 - movies.size();
-        for (int i = 0; i < emptyPanels; i++) {
-            movieGridPanel.add(createEmptyPanel());
-        }
-
-        movieGridPanel.revalidate();
-        movieGridPanel.repaint();
-    }
-
     public void addMouseListener(JComponent component, Runnable onClickAction) {
         component.addMouseListener(new MouseAdapter() {
             @Override
@@ -303,5 +346,23 @@ public class AdminHomepage extends JFrame {
                 onClickAction.run();
             }
         });
+    }
+}
+
+class Moveivotes {
+    private String movieName;
+    private int votes;
+
+    public Moveivotes(String movieName, int votes) {
+        this.movieName = movieName;
+        this.votes = votes;
+    }
+
+    public String getMovieName() {
+        return movieName;
+    }
+
+    public int getVotes() {
+        return votes;
     }
 }
