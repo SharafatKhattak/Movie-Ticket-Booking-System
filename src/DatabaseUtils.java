@@ -38,28 +38,5 @@ public class DatabaseUtils {
     }
 
 
-    public static List<String> getMovies() {
-        List<String> movies = new ArrayList<>();
-        String query = "SELECT name, genre FROM movies";
-
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(query);
-             ResultSet rs = pstmt.executeQuery()) {
-
-            while (rs.next()) {
-                String movie = rs.getString("name") + " (" + rs.getString("genre") + ")";
-                movies.add(movie);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return movies;
-    }
-
-
-
-}
-
 }
 

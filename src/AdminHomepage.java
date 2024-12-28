@@ -125,9 +125,9 @@ public class AdminHomepage extends JFrame {
             new AdminHomepage(adminName);
         });
         menuPanel.add(homepageButton, gbc);
-        JComponent manageAccount = createMenuButton("ManageAccount", e -> {});
+        JComponent manageAccount = createMenuButton("Manage Account", e -> {});
         addMouseListener(manageAccount, () -> {
-            new ManageAccount(adminName,true);
+            //new ManageAccount();
         });
         menuPanel.add(manageAccount, gbc);
 
@@ -311,4 +311,5 @@ public class AdminHomepage extends JFrame {
             }
         });
     }
+
 }
