@@ -9,14 +9,15 @@ import java.util.List;
 public class Homepage extends JFrame {
 
     private String username;
+    private int id;
     // Database connection details
     private static final String DB_URL = "jdbc:mysql://localhost:3306/moviebeats";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "sharafat@321";
 
-    public Homepage(String username) {
+    public Homepage(String username,int id) {
         this.username = username; // Set the username
-
+        this.id = id;
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
@@ -73,6 +74,25 @@ public class Homepage extends JFrame {
         JLabel title = new JLabel("Movie Ticket Booking System");
         title.setForeground(Color.WHITE);
         title.setFont(new Font("Segoe Print", Font.BOLD | Font.ITALIC, 30));
+        title.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                title.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                title.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose();
+                new Homepage(username,id).setVisible(true);
+            }
+        });
+
+
         titlePanel.add(title, BorderLayout.WEST); // Add title to the left side
 
         // Username Label
@@ -100,7 +120,10 @@ public class Homepage extends JFrame {
         menuPanel.add(createMenuButton("Homepage", e -> new Dashboard()), gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
         menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
-        menuPanel.add(createMenuButton("Offers & Discounts", e -> showMessage("Offers & Discounts button clicked!")), gbc);
+        menuPanel.add(createMenuButton("Manage Account", e -> {
+            ManageAccount manageAccount = new ManageAccount(id); // Pass userId to ManageAccount
+            manageAccount.setVisible(true); // Show the ManageAccount frame
+        }), gbc);
 
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
@@ -117,11 +140,24 @@ public class Homepage extends JFrame {
 
         List<Movie> movies = fetchMoviesFromDatabase(); // Fetch movies from the database
         for (Movie movie : movies) {
-            movieGridPanel.add(createMoviePanel(movie));
+            movieGridPanel.add(createMoviePanel(movie)); // Add movie panels to the grid
+        }
+
+        // Add empty panels to fill the grid if there are fewer than 9 movies
+        int emptyPanels = 9 - movies.size();
+        for (int i = 0; i < emptyPanels; i++) {
+            movieGridPanel.add(createEmptyPanel()); // Add empty panels to fill space
         }
 
         return movieGridPanel;
     }
+
+    private JPanel createEmptyPanel() {
+        JPanel emptyPanel = new JPanel();
+        emptyPanel.setOpaque(false); // Make sure the empty panel is transparent
+        return emptyPanel;
+    }
+
 
     private JPanel createMoviePanel(Movie movie) {
         JPanel moviePanel = new JPanel();

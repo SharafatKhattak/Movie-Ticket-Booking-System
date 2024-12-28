@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 
 public class Login extends JFrame {
 
-
+    private int userId;
     public Login() {
         setTitle("Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -120,7 +120,7 @@ public class Login extends JFrame {
                     if (authenticateUser(username, password)) {
                         JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
                         dispose();
-                        Homepage homepage=new Homepage(username);
+                        Homepage homepage=new Homepage(username,userId);
 
                         // Proceed to the next screen or functionality
                     } else {
@@ -151,11 +151,11 @@ public class Login extends JFrame {
     }
 
     private boolean authenticateUser(String username, String password) {
-        String dbUrl = "jdbc:mysql://127.0.0.1:3306/movei_ticket"; // Database URL
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/moviebeats"; // Database URL
         String dbUser = "root"; // Replace with your MySQL username
-        String dbPassword = "Shabi6264@"; // Replace with your MySQL password
+        String dbPassword = "sharafat@321"; // Replace with your MySQL password
 
-        String query = "SELECT Password FROM users WHERE Username = ?";
+        String query = "SELECT user_id, password_hash FROM users WHERE username = ?";
 
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement stmt = conn.prepareStatement(query)) {
@@ -167,7 +167,8 @@ public class Login extends JFrame {
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                String storedPasswordHash = rs.getString("Password");
+                String storedPasswordHash = rs.getString("password_hash");
+                userId = rs.getInt("user_id"); // Retrieve and store the user's ID
 
                 // Compare hashed password (use an actual hashing library like bcrypt here)
                 if (password.equals(storedPasswordHash)) { // Replace with hashed comparison
