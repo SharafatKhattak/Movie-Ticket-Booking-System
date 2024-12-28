@@ -2,19 +2,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class adminLogin extends JFrame {
-    private String password1, password2;
-
-    private void setPassword1() {
-        password1 = "sharafat@321";
-        password2 = "shoaib@321";
-    }
-
     adminLogin() {
-        setPassword1();  // Ensure the passwords are set
         setTitle("Admin Login");
-        setSize(450, 150);
+        setSize(450, 200);
         setLayout(null);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -22,59 +18,93 @@ public class adminLogin extends JFrame {
 
         // Background
         ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("adminloginbg.jpg"));
-        Image i2 = i1.getImage().getScaledInstance(450, 150, Image.SCALE_DEFAULT);
+        Image i2 = i1.getImage().getScaledInstance(450, 200, Image.SCALE_DEFAULT);
         ImageIcon i3 = new ImageIcon(i2);
         JLabel background = new JLabel(i3);
-        background.setBounds(0, 0, 450, 150);
+        background.setBounds(0, 0, 450, 200);
         add(background);
 
-        // Label
-        JLabel lblNewLabel = new JLabel("Enter Password:");
-        lblNewLabel.setFont(new Font("segoe print", Font.BOLD | Font.ITALIC, 15));
-        lblNewLabel.setForeground(Color.white);
-        lblNewLabel.setBounds(0, 20, 130, 30);
-        background.add(lblNewLabel);
+        // Username/Email Label
+        JLabel userLabel = new JLabel("Enter Username/Email:");
+        userLabel.setFont(new Font("Segoe Print", Font.ITALIC, 12));
+        userLabel.setForeground(Color.white);
+        userLabel.setBounds(20, 20, 180, 30);
+        background.add(userLabel);
+
+        // Username/Email Field
+        JTextField userField = new JTextField();
+        userField.setBounds(200, 23, 200, 25);
+        userField.setFont(new Font("Segoe Print", Font.PLAIN, 15));
+        background.add(userField);
+
+        // Password Label
+        JLabel passwordLabel = new JLabel("Enter Password:");
+        passwordLabel.setFont(new Font("Segoe Print",Font.ITALIC, 12));
+        passwordLabel.setForeground(Color.white);
+        passwordLabel.setBounds(20, 60, 130, 30);
+        background.add(passwordLabel);
 
         // Password Field
-        JPasswordField password = new JPasswordField("");
-        password.setBounds(130, 23, 200, 25);
-        password.setFont(new Font("segoe print", Font.PLAIN, 15));
+        JPasswordField passwordField = new JPasswordField("");
+        passwordField.setBounds(200, 63, 200, 25);
+        passwordField.setFont(new Font("Segoe Print", Font.PLAIN, 15));
+        background.add(passwordField);
 
-        //LoginBtn
+        // Login Button
         JButton loginButton = new JButton("Login");
         loginButton.setFont(new Font("Segoe Print", Font.BOLD, 15));
         loginButton.setBackground(new Color(53, 109, 122));
         loginButton.setForeground(Color.WHITE);
         loginButton.setFocusPainted(false);
-        loginButton.setBounds(350, 23, 80, 30);  // Set bounds
+        loginButton.setBounds(150, 100, 100, 30); // Set bounds
         loginButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String enteredPassword = new String(password.getPassword());  // Correct method to get password
-                if (enteredPassword.isEmpty()) {
-                    JOptionPane.showMessageDialog(null, "Password is empty.");
+                String enteredUser = userField.getText();
+                String enteredPassword = new String(passwordField.getPassword());
+
+                if (enteredUser.isEmpty() || enteredPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Username/Email or Password is empty.");
                 } else {
-                    if (enteredPassword.equals(password1)) {
-                        JOptionPane.showMessageDialog(null, "Welcome Back Sharafat.");
+                    String username = validateAdmin(enteredUser, enteredPassword);
+                    if (username != null) {
+                        JOptionPane.showMessageDialog(null, "Welcome Back " + username + ".");
                         dispose();
-                        AdminHomepage adminHomepage = new AdminHomepage("Sharafat");
-                    } else if (enteredPassword.equals(password2)) {
-                        JOptionPane.showMessageDialog(null, "Welcome Back Shoaib.");
-                        dispose();
-                        AdminHomepage adminHomepage = new AdminHomepage("Shoaib");
-
+                        AdminHomepage adminHomepage = new AdminHomepage(username);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Wrong Password.");
-                        password.setText("");
-
+                        JOptionPane.showMessageDialog(null, "Invalid Username/Email or Password.");
+                        passwordField.setText("");
                     }
                 }
             }
         });
         background.add(loginButton);
 
-        background.add(password);
         setVisible(true);
     }
+
+    private String validateAdmin(String userInput, String password) {
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String dbUser = "root";
+        String dbPassword = "sharafat@321";
+        String query = "SELECT username FROM admins WHERE (email = ? OR username = ?) AND password = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, dbUser, dbPassword);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, userInput); // Bind the email or username
+            stmt.setString(2, userInput); // Bind the same input for username
+            stmt.setString(3, password); // Bind the password
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("username"); // Return the username if credentials are valid
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error connecting to the database.");
+        }
+        return null; // Return null if validation fails
+    }
+
 
 }
