@@ -121,7 +121,7 @@ public class Homepage extends JFrame {
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
         menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
         menuPanel.add(createMenuButton("Manage Account", e -> {
-            ManageAccount manageAccount = new ManageAccount(id); // Pass userId to ManageAccount
+            ManageAccount manageAccount = new UserAccount(id); // Pass userId to ManageAccount
             manageAccount.setVisible(true); // Show the ManageAccount frame
         }), gbc);
 
