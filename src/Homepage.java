@@ -14,10 +14,12 @@ public class Homepage extends JFrame {
     private static final String DB_URL = "jdbc:mysql://localhost:3306/moviebeats";
     private static final String DB_USER = "root";
     private static final String DB_PASSWORD = "sharafat@321";
+    private boolean isUser;
 
-    public Homepage(String username,int id) {
-        this.username = username; // Set the username
+    public Homepage(String username, int id, boolean isUser) {
+        this.username = username;
         this.id = id;
+        this.isUser = isUser;
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
@@ -88,7 +90,7 @@ public class Homepage extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 dispose();
-                new Homepage(username,id).setVisible(true);
+                new Homepage(username,id,true).setVisible(true);
             }
         });
 
@@ -119,11 +121,25 @@ public class Homepage extends JFrame {
         gbc.anchor = GridBagConstraints.WEST;
         menuPanel.add(createMenuButton("Homepage", e -> new Dashboard()), gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
-        menuPanel.add(createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked")), gbc);
-        menuPanel.add(createMenuButton("Manage Account", e -> {
+
+        // Disable "My Bookings" for guests
+        JButton myBookingsButton = createMenuButton("My Bookings", e -> showMessage("My Booking button Clicked"));
+        if (!isUser) {
+            myBookingsButton.setEnabled(false);  // Disable for guests
+            myBookingsButton.setToolTipText("Please log in to access your bookings.");
+        }
+        menuPanel.add(myBookingsButton, gbc);
+
+        // Disable "Manage Account" for guests
+        JButton manageAccountButton = createMenuButton("Manage Account", e -> {
             ManageAccount manageAccount = new UserAccount(id); // Pass userId to ManageAccount
             manageAccount.setVisible(true); // Show the ManageAccount frame
-        }), gbc);
+        });
+        if (!isUser) {
+            manageAccountButton.setEnabled(false);  // Disable for guests
+            manageAccountButton.setToolTipText("Please log in to manage your account.");
+        }
+        menuPanel.add(manageAccountButton, gbc);
 
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
@@ -132,6 +148,7 @@ public class Homepage extends JFrame {
 
         return menuPanel;
     }
+
 
     private JPanel createMovieGridPanel() {
         JPanel movieGridPanel = new JPanel();
@@ -173,8 +190,13 @@ public class Homepage extends JFrame {
         bookButton.setForeground(Color.WHITE);
         bookButton.setFocusPainted(false);
         bookButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        bookButton.addActionListener(e -> new Moviedetail(movie.getMovieName(), movie.getGenre(), movie.getShowingDate(), movie.getPosterPath()).setVisible(true));
-        // Change cursor to hand when mouse enters the button
+        bookButton.addActionListener(e -> {
+            if (isUser) {
+                new Moviedetail(movie.getMovieName(), movie.getGenre(), movie.getShowingDate(), movie.getPosterPath()).setVisible(true);
+            } else {
+                JOptionPane.showMessageDialog(null, "Please login before booking.", "Guest Access", JOptionPane.WARNING_MESSAGE);
+            }
+        });
         bookButton.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent evt) {
