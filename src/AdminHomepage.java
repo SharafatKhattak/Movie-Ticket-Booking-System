@@ -14,9 +14,11 @@ public class AdminHomepage extends JFrame {
     private List<Movie> movies;
     private JPanel movieGridPanel;
     private String adminName;
+    private int adminId;
 
     public AdminHomepage(String AdminName) {
         this.adminName = AdminName;
+        adminId=fetchAdminId(adminName);
         // Set frame properties
         setIconImage(new ImageIcon(getClass().getResource("/Logo.png")).getImage());
         setTitle("Movie Booking System");
@@ -125,11 +127,13 @@ public class AdminHomepage extends JFrame {
             new AdminHomepage(adminName);
         });
         menuPanel.add(homepageButton, gbc);
-        JComponent manageAccount = createMenuButton("Manage Account", e -> {});
-        addMouseListener(manageAccount, () -> {
-            //new ManageAccount();
+        JButton manageAccountButton = createMenuButton("Manage Account", e -> {
+            AdminAccount adminAccount = new AdminAccount(adminId);
+            adminAccount.setVisible(true);
         });
-        menuPanel.add(manageAccount, gbc);
+
+
+        menuPanel.add(manageAccountButton, gbc);
 
 
         // Add "Add Movie" Button
@@ -311,5 +315,34 @@ public class AdminHomepage extends JFrame {
             }
         });
     }
+
+    private int fetchAdminId(String adminName) {
+        int id = -1; // Default to -1 if not found
+        String url = "jdbc:mysql://localhost:3306/moviebeats";
+        String user = "root";
+        String password = "sharafat@321";
+
+        String query = "SELECT id FROM admins WHERE username = ?";
+
+        try (Connection conn = DriverManager.getConnection(url, user, password);
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, adminName);
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                id = rs.getInt("id");
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null,
+                    "Error fetching admin ID from database!",
+                    "Database Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+
+        return id;
+    }
+
+
 
 }

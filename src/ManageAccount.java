@@ -2,68 +2,38 @@ import javax.swing.*;
 import java.awt.*;
 import java.sql.*;
 
-public class ManageAccount extends JPanel {
-    private Connection connection;
-    private JTextField usernameField;
-    private JTextField emailField;
-    private JTextField passwordField;
-    private int id;
+public abstract class ManageAccount extends JPanel {
+    protected Connection connection;
+    protected JTextField usernameField;
+    protected JTextField emailField;
+    protected JTextField passwordField;
+    protected int id;
+    protected boolean isAdmin;
 
-    public ManageAccount(int id) {
-        this.id = id; // Store the user ID
-
-        // Set up the frame properties
-        JFrame frame = new JFrame("Manage Account");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(550, 500);
-        frame.setResizable(false); // Disable resizing
-        frame.add(this);
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
-
-        // Establish a database connection
-        setupDatabaseConnection();
-
-        // Retrieve user data from the database
-        String username = "", email = "", passwordHash = "";
-        try {
-            String query = "SELECT username, email, password_hash FROM users WHERE user_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id); // Use the id parameter
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            if (resultSet.next()) {
-                username = resultSet.getString("username");
-                email = resultSet.getString("email");
-                passwordHash = resultSet.getString("password_hash");
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error fetching user data: " + e.getMessage(), "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
+    public ManageAccount(int id, boolean isAdmin) {
+        this.id = id;
+        this.isAdmin = isAdmin;
 
         // Set up the layout to null (custom positioning)
         setLayout(null);
         setPreferredSize(new Dimension(550, 500));
 
         // Icon and header
-        // Load and scale the image
         ImageIcon icon = new ImageIcon(getClass().getResource("/user.png"));
         Image img = icon.getImage();
-        Image scaledImg = img.getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Resize the image to 100x100 pixels
-        icon = new ImageIcon(scaledImg); // Create a new ImageIcon with the scaled image
+        Image scaledImg = img.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+        icon = new ImageIcon(scaledImg);
 
-        // Set up the JLabel with the scaled image
         JLabel iconLabel = new JLabel(icon);
-        iconLabel.setBounds(225, 20, 100, 100); // Manually set bounds (x, y, width, height)
+        iconLabel.setBounds(225, 20, 100, 100);
         add(iconLabel);
 
         // Username row
         JLabel usernameLabel = createLabel("User Name");
-        usernameLabel.setBounds(50, 130, 100, 25); // x, y, width, height
+        usernameLabel.setBounds(50, 130, 100, 25);
         add(usernameLabel);
 
-        usernameField = createTextField(username);
+        usernameField = createTextField("");
         usernameField.setBounds(150, 130, 200, 25);
         usernameField.setEditable(false);
         add(usernameField);
@@ -91,7 +61,7 @@ public class ManageAccount extends JPanel {
         emailLabel.setBounds(50, 230, 100, 25);
         add(emailLabel);
 
-        emailField = createTextField(email);
+        emailField = createTextField("");
         emailField.setBounds(150, 230, 200, 25);
         emailField.setEditable(false);
         add(emailField);
@@ -105,56 +75,47 @@ public class ManageAccount extends JPanel {
         closeButton.setBounds(200, 300, 120, 30);
         closeButton.addActionListener(e -> closeWindow());
         add(closeButton);
+
+        // Establish a database connection
+        setupDatabaseConnection();
+
+        // Retrieve account data from the database
+        fetchAccountDataFromDB();
     }
 
-    private JLabel createLabel(String text) {
+    protected JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setForeground(Color.WHITE);
         return label;
     }
 
-    private JTextField createTextField(String text) {
+    protected JTextField createTextField(String text) {
         return new JTextField(text, 15);
     }
 
-    private JButton createChangeButton(String tooltip) {
+    protected JButton createChangeButton(String tooltip) {
         JButton button = new JButton("Change");
         button.setToolTipText(tooltip);
         button.addActionListener(e -> handleChange(tooltip));
         return button;
     }
 
-    private void handleChange(String field) {
+    protected void handleChange(String field) {
         String newValue = JOptionPane.showInputDialog(this, "Enter new value for " + field, "Update " + field,
                 JOptionPane.PLAIN_MESSAGE);
         if (newValue != null && !newValue.trim().isEmpty()) {
             try {
-                String updateQuery = "";
-                switch (field) {
-                    case "Change Username":
-                        updateQuery = "UPDATE users SET username = ? WHERE user_id = ?";
-                        break;
-                    case "Change Password":
-                        String hashedPassword = hashPassword(newValue); // Hash the password
-                        updateQuery = "UPDATE users SET password_hash = ? WHERE user_id = ?";
-                        break;
-                    case "Change Email":
-                        updateQuery = "UPDATE users SET email = ? WHERE user_id = ?";
-                        break;
-                }
+                String updateQuery = getUpdateQuery(field);
+                PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
+                preparedStatement.setString(1, newValue);
+                preparedStatement.setInt(2, id);
+                int rowsUpdated = preparedStatement.executeUpdate();
 
-                if (!updateQuery.isEmpty()) {
-                    PreparedStatement preparedStatement = connection.prepareStatement(updateQuery);
-                    preparedStatement.setString(1, newValue);
-                    preparedStatement.setInt(2, id); // Use the user ID
-                    int rowsUpdated = preparedStatement.executeUpdate();
-
-                    if (rowsUpdated > 0) {
-                        JOptionPane.showMessageDialog(this, field + " updated successfully.");
-                        fetchUserDataFromDB(); // Refresh data after update
-                    } else {
-                        JOptionPane.showMessageDialog(this, "Failed to update " + field, "Database Error", JOptionPane.ERROR_MESSAGE);
-                    }
+                if (rowsUpdated > 0) {
+                    JOptionPane.showMessageDialog(this, field + " updated successfully.");
+                    fetchAccountDataFromDB(); // Refresh data
+                } else {
+                    JOptionPane.showMessageDialog(this, "No rows updated. Please check input.", "Update Error", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (SQLException e) {
                 JOptionPane.showMessageDialog(this, "Error updating " + field + ": " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
@@ -162,54 +123,20 @@ public class ManageAccount extends JPanel {
         }
     }
 
-    private String hashPassword(String password) {
-        // Simple password hashing (use a secure method like bcrypt in production)
-        return Integer.toHexString(password.hashCode());
-    }
+    protected abstract void setupDatabaseConnection();
 
-    private void fetchUserDataFromDB() {
-        // Refresh user data from the database after update
-        try {
-            String query = "SELECT username, email, password_hash FROM users WHERE user_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(query);
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+    protected abstract void fetchAccountDataFromDB();
 
-            if (resultSet.next()) {
-                String username = resultSet.getString("username");
-                String email = resultSet.getString("email");
-                String passwordHash = resultSet.getString("password_hash");
+    protected abstract String getUpdateQuery(String field);
 
-                // Update the UI components with the new data
-                updateUIFields(username, email, passwordHash);
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error fetching updated user data: " + e.getMessage(), "Database Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void updateUIFields(String username, String email, String passwordHash) {
-        // Update the JTextField values with the new data from the database
+    protected void updateUIFields(String username, String email, String password) {
         usernameField.setText(username);
         emailField.setText(email);
-        passwordField.setText("********"); // Hide password value
+        passwordField.setText("********");
     }
 
     private void closeWindow() {
         SwingUtilities.getWindowAncestor(this).dispose();
-    }
-
-    private void setupDatabaseConnection() {
-        try {
-            // Modify the database URL, username, and password as needed
-            String dbUrl = "jdbc:mysql://localhost:3306/moviebeats";
-            String dbUsername = "root";
-            String dbPassword = "sharafat@321";
-            connection = DriverManager.getConnection(dbUrl, dbUsername, dbPassword);
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error connecting to database: " + e.getMessage(), "Database Error",
-                    JOptionPane.ERROR_MESSAGE);
-        }
     }
 
     @Override
