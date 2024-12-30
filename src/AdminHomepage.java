@@ -112,7 +112,7 @@ public class AdminHomepage extends JFrame {
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
         // Add welcome label
-        JLabel welcomeLabel = new JLabel("Welcome "+adminName+"!");
+        JLabel welcomeLabel = new JLabel("Welcome " + adminName + "!");
         welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         welcomeLabel.setForeground(Color.WHITE);
         welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -127,14 +127,25 @@ public class AdminHomepage extends JFrame {
             new AdminHomepage(adminName);
         });
         menuPanel.add(homepageButton, gbc);
+
         JButton manageAccountButton = createMenuButton("Manage Account", e -> {
             AdminAccount adminAccount = new AdminAccount(adminId);
             adminAccount.setVisible(true);
         });
-
-
         menuPanel.add(manageAccountButton, gbc);
 
+        JButton addNewAdminButton = createMenuButton("Add New Admin", e -> {
+            JFrame frame = new JFrame("Add New Admin");
+            frame.setSize(550, 500);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setLocationRelativeTo(null);
+
+            AddNewAdmin addNewAdminPanel = new AddNewAdmin();
+            frame.add(addNewAdminPanel);
+
+            frame.setVisible(true);
+        });
+        menuPanel.add(addNewAdminButton, gbc);
 
         // Add "Add Movie" Button
         gbc.anchor = GridBagConstraints.CENTER;
@@ -151,6 +162,7 @@ public class AdminHomepage extends JFrame {
 
         return menuPanel;
     }
+
 
     private JPanel createMovieGridPanel() {
         JPanel movieGridPanel = new JPanel();

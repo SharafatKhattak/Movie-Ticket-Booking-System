@@ -2,6 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.regex.Pattern;
 
 public class Signup extends JFrame {
 
@@ -100,39 +101,52 @@ public class Signup extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 String username = usernameField.getText().trim();
                 String email = emailField.getText().trim();
-                String password = new String(passwordField.getPassword());
-                String confirmPassword = new String(confirmPasswordField.getPassword());
+                String password = new String(passwordField.getPassword()).trim();
+                String confirmPassword = new String(confirmPasswordField.getPassword()).trim();
 
-                if (password.equals(confirmPassword)) {
-                    try {
+                // Validate input
+                if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "All fields are required!", "Validation Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-                        String hashedPassword = password;
+                // Validate email format (specifically Gmail)
+                if (!isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid Gmail address.", "Email Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
-                        DatabaseUtils.saveUser(username, email, hashedPassword);
-                        JOptionPane.showMessageDialog(null, "Sign-Up Successful!");
-                        dispose();
-                        // Open the Login page (ensure Login class is implemented)
-                        Login login = new Login();
-                        login.setVisible(true);
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(null, "An error occurred while signing up!", "Error", JOptionPane.ERROR_MESSAGE);
-                        ex.printStackTrace();
-                    }
-                } else {
+                // Check if password and confirm password match
+                if (!password.equals(confirmPassword)) {
                     JOptionPane.showMessageDialog(null, "Passwords do not match!", "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                try {
+                    String Password = password;
+
+                    // Save the user to the database (replace with actual database logic)
+                    DatabaseUtils.saveUser(username, email, Password);
+                    JOptionPane.showMessageDialog(null, "Sign-Up Successful!");
+                    dispose();
+                    // Open the Login page (ensure Login class is implemented)
+                    Login login = new Login();
+                    login.setVisible(true);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "An error occurred while signing up!", "Error", JOptionPane.ERROR_MESSAGE);
+                    ex.printStackTrace();
                 }
             }
         });
 
-
         cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                dispose(); // Close the signup window
+                dispose();
             }
         });
 
-        // Add content panel on top of the gradient background
+
         panel.add(contentPanel);
 
         // Add the panel to the frame
@@ -140,5 +154,10 @@ public class Signup extends JFrame {
         setVisible(true);
     }
 
-
+    // Function to validate email format (only allows Gmail)
+    private boolean isValidEmail(String email) {
+        // Gmail format validation
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@gmail\\.com$";
+        return Pattern.matches(emailRegex, email);
+    }
 }

@@ -159,10 +159,19 @@ public class InterFace1 extends JFrame {
         guestButton.setForeground(Color.black);
         guestButton.setBackground(Color.lightGray);
 
+        guestButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Create a new Homepage instance for a guest user
+                new Homepage("Guest", 0, false);
+                // You may want to close the current frame after opening the guest homepage
+                dispose();
+            }
+        });
         // Mouse hover effect to change cursor
         guestButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(MouseEvent evt) {
-                guestButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)); // Set cursor to pointer
+                guestButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));// Set cursor to pointer
             }
         });
 

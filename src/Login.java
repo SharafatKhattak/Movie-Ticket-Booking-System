@@ -38,10 +38,10 @@ public class Login extends JFrame {
         background.add(heading);
 
         // Username Label
-        JLabel nameText = new JLabel("User Name:");
+        JLabel nameText = new JLabel("User Name/Email:");
         nameText.setFont(new Font("Segoe Print", Font.BOLD, 15));
         nameText.setForeground(Color.WHITE);
-        nameText.setBounds(50, 100, 100, 30);  // Set bounds
+        nameText.setBounds(0, 100, 170, 30);  // Set bounds
         background.add(nameText);
 
         // Username Field
@@ -53,7 +53,7 @@ public class Login extends JFrame {
         JLabel passwordText = new JLabel("Password:");
         passwordText.setFont(new Font("Segoe Print", Font.BOLD, 15));
         passwordText.setForeground(Color.WHITE);
-        passwordText.setBounds(50, 160, 100, 30);  // Set bounds
+        passwordText.setBounds(0, 160, 100, 30);  // Set bounds
         background.add(passwordText);
 
         // Password Field
@@ -118,9 +118,8 @@ public class Login extends JFrame {
                     JOptionPane.showMessageDialog(Login.this, "Please enter both username and password.", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
                     if (authenticateUser(username, password)) {
-                        JOptionPane.showMessageDialog(Login.this, "Login Successful!", "Info", JOptionPane.INFORMATION_MESSAGE);
                         dispose();
-                        Homepage homepage=new Homepage(username,userId);
+                        Homepage homepage=new Homepage(username,userId,true);
 
                         // Proceed to the next screen or functionality
                     } else {
@@ -150,18 +149,20 @@ public class Login extends JFrame {
         setVisible(true);
     }
 
-    private boolean authenticateUser(String username, String password) {
+    private boolean authenticateUser(String usernameOrEmail, String password) {
         String dbUrl = "jdbc:mysql://127.0.0.1:3306/moviebeats"; // Database URL
         String dbUser = "root"; // Replace with your MySQL username
         String dbPassword = "sharafat@321"; // Replace with your MySQL password
 
-        String query = "SELECT user_id, password_hash FROM users WHERE username = ?";
+        // Updated query to search for both username and email using the same input field
+        String query = "SELECT user_id, password_hash FROM users WHERE username = ? OR email = ?";
 
         try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword);
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            // Set the username in the query
-            stmt.setString(1, username);
+            // Set the value (which could be either username or email) in both fields
+            stmt.setString(1, usernameOrEmail);
+            stmt.setString(2, usernameOrEmail);
 
             // Execute the query
             ResultSet rs = stmt.executeQuery();
@@ -178,8 +179,8 @@ public class Login extends JFrame {
                     return false; // Incorrect password
                 }
             } else {
-                JOptionPane.showMessageDialog(this, "Username not found.", "Error", JOptionPane.ERROR_MESSAGE);
-                return false; // Username not found
+                JOptionPane.showMessageDialog(this, "Username or email not found.", "Error", JOptionPane.ERROR_MESSAGE);
+                return false; // Username or email not found
             }
 
         } catch (Exception ex) {
@@ -188,5 +189,6 @@ public class Login extends JFrame {
             return false;
         }
     }
+
 
 }
