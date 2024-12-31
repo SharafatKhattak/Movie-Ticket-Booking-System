@@ -41,7 +41,7 @@ public class Login extends JFrame {
         JLabel nameText = new JLabel("User Name/Email:");
         nameText.setFont(new Font("Segoe Print", Font.BOLD, 15));
         nameText.setForeground(Color.WHITE);
-        nameText.setBounds(0, 100, 170, 30);  // Set bounds
+        nameText.setBounds(10, 100, 170, 30);  // Set bounds
         background.add(nameText);
 
         // Username Field
@@ -53,7 +53,7 @@ public class Login extends JFrame {
         JLabel passwordText = new JLabel("Password:");
         passwordText.setFont(new Font("Segoe Print", Font.BOLD, 15));
         passwordText.setForeground(Color.WHITE);
-        passwordText.setBounds(0, 160, 100, 30);  // Set bounds
+        passwordText.setBounds(10, 160, 100, 30);  // Set bounds
         background.add(passwordText);
 
         // Password Field

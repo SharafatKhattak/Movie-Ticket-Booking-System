@@ -119,7 +119,26 @@ public class Homepage extends JFrame {
 
         // Add menu buttons
         gbc.anchor = GridBagConstraints.WEST;
-        menuPanel.add(createMenuButton("Homepage", e -> new Dashboard()), gbc);
+        JButton homepageButton = createMenuButton("Homepage", null);
+        homepageButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                homepageButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                homepageButton.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                dispose(); // Close the current frame
+                new Homepage(username,id,true).setVisible(true);
+            }
+        });
+
+        menuPanel.add(homepageButton, gbc);
         menuPanel.add(createMenuButton("Available Movies", e -> new AvailableMovei()), gbc);
 
         // Disable "My Bookings" for guests
@@ -141,10 +160,46 @@ public class Homepage extends JFrame {
         }
         menuPanel.add(manageAccountButton, gbc);
 
+        JButton enterPoll = createMenuButton("EnterPoll", null);
+
+        enterPoll.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (enterPoll.isEnabled()) {
+                    enterPoll.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    enterPoll.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                enterPoll.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!enterPoll.isEnabled()) {
+                    return; // Do nothing
+                }
+                new Enterpoll(false,id).setVisible(true);
+            }
+        });
+
+
+        if (!isUser) {
+            enterPoll.setEnabled(false); // Disable for guests
+            enterPoll.setToolTipText("Please log in to manage your account.");
+        }
+
+        menuPanel.add(enterPoll, gbc);
+
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.SOUTH;
         menuPanel.add(createSignOutButton(), gbc);
+
+
 
         return menuPanel;
     }
