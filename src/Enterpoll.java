@@ -1,171 +1,164 @@
 import javax.swing.*;
 import java.awt.*;
-import java.sql.*;
-import java.util.Vector;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 public class Enterpoll extends JFrame {
 
-    private JComboBox<String> movieComboBox;
-    private JTextField movieTextField;
+    private int userId;  // Change the userId to an integer
 
-    public Enterpoll() {
-        setTitle("Enter a Poll - Movie Booking System");
-        initializePage("Enter a Poll",
-                "<html>Participate in a poll to help us improve!<br>"
-                        + "Enter your favorite movie and submit your vote:</html>");
-    }
-
-    private void initializePage(String heading, String question) {
+    public Enterpoll(boolean isAdmin, int userId) {
+        this.userId = userId; // Set the user ID from the constructor
+        setTitle(isAdmin ? "Admin: Movie Suggestions" : "User: Enter Your Suggestion");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setSize(800, 600);
+        setSize(550, 500);
         setResizable(false);
+        setLocationRelativeTo(null);
 
-        JPanel background = createBackgroundPanel();
-        background.setLayout(new BorderLayout());
-
-        // Add Title and Poll Content
-        background.add(createTitlePanel(heading), BorderLayout.NORTH);
-        background.add(createPollPanel(question), BorderLayout.CENTER);
-
-        add(background);
-        setVisible(true);
-    }
-
-    private JPanel createBackgroundPanel() {
-        return new JPanel() {
+        // Gradient Background Panel
+        JPanel gradientPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 GradientPaint gradient = new GradientPaint(0, 0, Color.DARK_GRAY, getWidth(), getHeight(), Color.RED);
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
+        gradientPanel.setLayout(null);
+        add(gradientPanel);
+
+        // Header Label
+        JLabel header = new JLabel(isAdmin ? "Admin: Movie Suggestions" : "Enter Your Suggestion");
+        header.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        header.setForeground(Color.WHITE);
+        header.setBounds(150, 10, 300, 30);
+        gradientPanel.add(header);
+
+        if (isAdmin) {
+            loadAdminView(gradientPanel);
+        } else {
+            loadUserView(gradientPanel);
+        }
+
+        setVisible(true);
     }
 
-    private JPanel createTitlePanel(String titleText) {
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        titlePanel.setOpaque(false);
+    private void loadUserView(JPanel panel) {
+        // Movie Name Label and TextField
+        JLabel movieLabel = new JLabel("Movie Name:");
+        movieLabel.setBounds(30, 60, 100, 25);
+        movieLabel.setForeground(Color.WHITE);
+        panel.add(movieLabel);
 
-        JLabel title = new JLabel(titleText);
-        title.setForeground(Color.WHITE);
-        title.setFont(new Font("Segoe Print", Font.BOLD | Font.ITALIC, 30));
+        JTextField movieField = new JTextField();
+        movieField.setBounds(160, 60, 300, 25);
+        panel.add(movieField);
 
-        titlePanel.add(title);
-        return titlePanel;
-    }
+        // Description Label and TextField
+        JLabel descLabel = new JLabel("Description (Optional):");
+        descLabel.setBounds(30, 100, 150, 25);
+        descLabel.setForeground(Color.WHITE);
+        panel.add(descLabel);
 
-    private JPanel createPollPanel(String question) {
-        // Main poll panel
-        JPanel pollPanel = new JPanel();
-        pollPanel.setOpaque(false); // Transparent background
-        pollPanel.setLayout(new GridBagLayout()); // Fine-grained control of component placement
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 5, 5, 5); // Minimal spacing
-        gbc.gridx = 0;
-        gbc.gridy = 0;
+        JTextArea descField = new JTextArea();
+        descField.setBounds(160, 100, 300, 200);
+        descField.setLineWrap(true); // Enable line wrapping
+        descField.setWrapStyleWord(true); // Wrap at word boundaries
+        descField.setFont(new Font("Segoe UI", Font.PLAIN, 14)); // Set font size
+        descField.setMargin(new Insets(5, 5, 5, 5)); // Add padding for better readability
+        panel.add(descField);
 
-        // Question label
-        JLabel questionLabel = new JLabel(question);
-        questionLabel.setFont(new Font("Segoe UI", Font.PLAIN, 18));
-        questionLabel.setForeground(Color.LIGHT_GRAY);
-        pollPanel.add(questionLabel, gbc);
+        // Save Button
+        JButton saveButton = new JButton("Submit Suggestion");
+        saveButton.setBounds(180, 360, 200, 30);
+        saveButton.setBackground(Color.WHITE);
+        saveButton.setFocusPainted(false);
+        panel.add(saveButton);
 
-        // Text field for movie input
-        movieTextField = new JTextField(20);
-        movieTextField.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        movieTextField.addActionListener(e -> fetchSuggestions(movieTextField.getText()));
-        gbc.gridy++;
-        pollPanel.add(movieTextField, gbc);
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String movieName = movieField.getText().trim();
+                String description = descField.getText().trim();
 
-        // Combo box for suggestions
-        movieComboBox = new JComboBox<>();
-        movieComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        movieComboBox.setEditable(false);
-        movieComboBox.addActionListener(e -> {
-            String selectedMovie = (String) movieComboBox.getSelectedItem();
-            if (selectedMovie != null) {
-                movieTextField.setText(selectedMovie);
+                if (movieName.isEmpty()) {
+                    JOptionPane.showMessageDialog(panel, "Movie name is required!", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    saveMovieSuggestion(movieName, description);
+                }
             }
         });
-        gbc.gridy++;
-        pollPanel.add(movieComboBox, gbc);
-
-        // Submit button
-        JButton submitButton = new JButton("Submit Vote");
-        submitButton.setFont(new Font("Segoe UI", Font.PLAIN, 16));
-        submitButton.setBackground(new Color(191, 64, 64));
-        submitButton.setForeground(Color.WHITE);
-        submitButton.setFocusPainted(false);
-        submitButton.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        submitButton.addActionListener(e -> submitVote(movieTextField.getText()));
-        gbc.gridy++;
-        pollPanel.add(submitButton, gbc);
-
-        return pollPanel;
     }
 
-    private void fetchSuggestions(String userInput) {
-        if (userInput.isEmpty()) {
-            movieComboBox.setModel(new DefaultComboBoxModel<>(new String[0])); // Clear combo box if input is empty
-            return;
+    private void loadAdminView(JPanel panel) {
+        JLabel adminLabel = new JLabel("List of Movie Suggestions:");
+        adminLabel.setBounds(50, 60, 300, 25);
+        adminLabel.setForeground(Color.WHITE);
+        panel.add(adminLabel);
+
+        JTextArea suggestionsList = new JTextArea();
+        suggestionsList.setEditable(false);
+        suggestionsList.setBounds(50, 90, 450, 300);
+        panel.add(suggestionsList);
+
+        loadMovieSuggestions(suggestionsList);
+    }
+
+    private void saveMovieSuggestion(String movieName, String description) {
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/moviebeats"; // Replace with your database
+        String dbUser = "root"; // Replace with your DB username
+        String dbPassword = "sharafat@321"; // Replace with your DB password
+
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            // Check if the same user has already submitted the same movie
+            String checkQuery = "SELECT * FROM movie_suggestions WHERE movie_name = ? AND user_id = ?";
+            PreparedStatement checkStmt = conn.prepareStatement(checkQuery);
+            checkStmt.setString(1, movieName);
+            checkStmt.setInt(2, userId); // Use setInt for userId (now int)
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                JOptionPane.showMessageDialog(this, "You have already suggested this movie!", "Error", JOptionPane.ERROR_MESSAGE);
+            } else {
+                String insertQuery = "INSERT INTO movie_suggestions (movie_name, description, user_id) VALUES (?, ?, ?)";
+                PreparedStatement insertStmt = conn.prepareStatement(insertQuery);
+                insertStmt.setString(1, movieName);
+                insertStmt.setString(2, description.isEmpty() ? null : description);
+                insertStmt.setInt(3, userId); // Use setInt for userId (now int)
+                insertStmt.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Movie suggestion added successfully!");
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
 
-        String url = "jdbc:mysql://localhost:3306/moviebeats";
-        String user = "root";
-        String password = "Shabi6264@";
+    private void loadMovieSuggestions(JTextArea suggestionsList) {
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/moviebeats";
+        String dbUser = "root";
+        String dbPassword = "sharafat@321";
 
-        // Modified query to fetch all movies that have votes
-        String query = "SELECT movie_name FROM poll_votes WHERE movie_name LIKE ? AND votes > 0 ORDER BY movie_name LIMIT 10";
-
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(query)) {
-
-            stmt.setString(1, "%" + userInput + "%");
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            String query = "SELECT movie_name, votes FROM movie_suggestions";
+            PreparedStatement stmt = conn.prepareStatement(query);
             ResultSet rs = stmt.executeQuery();
 
-            Vector<String> suggestions = new Vector<>();
+            StringBuilder sb = new StringBuilder();
             while (rs.next()) {
-                suggestions.add(rs.getString("movie_name"));
+                String movieName = rs.getString("movie_name");
+                int votes = rs.getInt("votes");
+                sb.append("Movie: ").append(movieName).append(", Votes: ").append(votes).append("\n");
             }
-
-            if (suggestions.isEmpty()) {
-                suggestions.add("No suggestions found.");
-            }
-
-            movieComboBox.setModel(new DefaultComboBoxModel<>(suggestions));
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error fetching suggestions from the database!");
+            suggestionsList.setText(sb.toString());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
-    private void submitVote(String movieName) {
-        if (movieName == null || movieName.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a valid movie name!");
-            return;
-        }
-
-        String url = "jdbc:mysql://localhost:3306/moviebeats";
-        String user = "root";
-        String password = "Shabi6264@";
-
-        String insertQuery = "INSERT INTO poll_votes (movie_name, votes) VALUES (?, 1) "
-                + "ON DUPLICATE KEY UPDATE votes = votes + 1";
-
-        try (Connection conn = DriverManager.getConnection(url, user, password);
-             PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
-
-            stmt.setString(1, movieName.trim());
-            stmt.executeUpdate();
-
-            JOptionPane.showMessageDialog(this, "Thank you for voting!");
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error submitting your vote. Please try again!");
-        }
-    }
 }

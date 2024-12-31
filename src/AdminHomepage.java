@@ -155,6 +155,33 @@ public class AdminHomepage extends JFrame {
         gbc.anchor = GridBagConstraints.CENTER;
         menuPanel.add(createMenuButton("Delete Movie", e -> new DeleteMovie(this::refreshMovies)), gbc);
 
+        JButton enterPoll = createMenuButton("ViewPoll", null);
+
+        enterPoll.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (enterPoll.isEnabled()) {
+                    enterPoll.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+                } else {
+                    enterPoll.setCursor(Cursor.getDefaultCursor());
+                }
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                enterPoll.setCursor(Cursor.getDefaultCursor());
+            }
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!enterPoll.isEnabled()) {
+                    return; // Do nothing
+                }
+                new Enterpoll(true,adminId).setVisible(true);
+            }
+        });
+
+        menuPanel.add(enterPoll, gbc);
         // Add Sign Out Button at the bottom
         gbc.weighty = 1.0;
         gbc.anchor = GridBagConstraints.SOUTH;
