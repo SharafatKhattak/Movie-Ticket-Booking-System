@@ -108,6 +108,35 @@ public class Enterpoll extends JFrame {
         panel.add(suggestionsList);
 
         loadMovieSuggestions(suggestionsList);
+
+        // Movie Name Label and TextField for Deletion
+        JLabel deleteLabel = new JLabel("Enter Movie Name to Delete:");
+        deleteLabel.setBounds(50, 400, 200, 25);
+        deleteLabel.setForeground(Color.WHITE);
+        panel.add(deleteLabel);
+
+        JTextField deleteField = new JTextField();
+        deleteField.setBounds(230, 400, 150, 25);
+        panel.add(deleteField);
+
+        // Delete Button
+        JButton deleteButton = new JButton("Delete Suggestion");
+        deleteButton.setBounds(385, 400, 150, 25);
+        deleteButton.setBackground(Color.WHITE);
+        deleteButton.setFocusPainted(false);
+        panel.add(deleteButton);
+
+        deleteButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String movieNameToDelete = deleteField.getText().trim();
+                if (movieNameToDelete.isEmpty()) {
+                    JOptionPane.showMessageDialog(panel, "Please enter a movie name to delete!", "Error", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    deleteMovieSuggestion(movieNameToDelete, suggestionsList);
+                }
+            }
+        });
     }
 
     private void saveMovieSuggestion(String movieName, String description) {
@@ -156,6 +185,28 @@ public class Enterpoll extends JFrame {
                 sb.append("Movie: ").append(movieName).append(", Votes: ").append(votes).append("\n");
             }
             suggestionsList.setText(sb.toString());
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void deleteMovieSuggestion(String movieName, JTextArea suggestionsList) {
+        String dbUrl = "jdbc:mysql://127.0.0.1:3306/moviebeats"; // Replace with your database
+        String dbUser = "root"; // Replace with your DB username
+        String dbPassword = "sharafat@321"; // Replace with your DB password
+
+        try (Connection conn = DriverManager.getConnection(dbUrl, dbUser, dbPassword)) {
+            String deleteQuery = "DELETE FROM movie_suggestions WHERE movie_name = ?";
+            PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery);
+            deleteStmt.setString(1, movieName);
+            int rowsAffected = deleteStmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                JOptionPane.showMessageDialog(this, "Movie suggestion deleted successfully!");
+                loadMovieSuggestions(suggestionsList); // Refresh the suggestions list
+            } else {
+                JOptionPane.showMessageDialog(this, "Movie not found!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
